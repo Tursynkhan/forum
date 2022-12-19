@@ -1,9 +1,17 @@
 package repository
 
+import (
+	"database/sql"
+
+	"forum/internal/models"
+)
+
 type (
-	Autorization interface{}
-	Post         interface{}
-	Comment      interface{}
+	Autorization interface {
+		CreateUser(user models.User) (int, error)
+	}
+	Post    interface{}
+	Comment interface{}
 )
 
 type Repository struct {
@@ -12,6 +20,8 @@ type Repository struct {
 	Comment
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		Autorization: NewAuthRepository(db),
+	}
 }
