@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	"forum/internal/models"
 )
@@ -15,5 +16,11 @@ func NewAuthRepository(db *sql.DB) *AuthSql {
 }
 
 func (r *AuthSql) CreateUser(user models.User) (int, error) {
-	return 0, nil
+	var id int
+	query := fmt.Sprintf("INSERT INTO %s (username,email,password) VALUES ($1,$2,$3)")
+	row := r.db.QueryRow(query, user.Username, user.Email, user.Password)
+	if err := row.Scan(&id); err != nil {
+		return 0, nil
+	}
+	return id, nil
 }
