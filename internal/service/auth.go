@@ -22,6 +22,9 @@ func (s *AuthService) CreateUser(user models.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
+func (s *AuthService) GenerateToken(username, password string) (string, error) {
+	//get user from DB
+}
 
 func generatePasswordHash(password string) string {
 	hash := sha1.New()

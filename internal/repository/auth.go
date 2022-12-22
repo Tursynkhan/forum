@@ -24,3 +24,9 @@ func (r *AuthSql) CreateUser(user models.User) (int, error) {
 	}
 	return id, nil
 }
+func (r *AuthSql) GetUser(username, password string) (models.User, error) {
+	var user models.User
+	query := fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password=$2", usertable)
+	err := r.db.GET(&user, query, username, password)
+	return user, err
+}
