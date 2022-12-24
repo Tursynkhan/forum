@@ -8,7 +8,7 @@ import (
 
 type (
 	Autorization interface {
-		CreateUser(user models.User) (int, error)
+		CreateUser(user models.User) error
 	}
 	Post    interface{}
 	Comment interface{}
