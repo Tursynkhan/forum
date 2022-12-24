@@ -17,8 +17,8 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.home)
-	mux.HandleFunc("/auth/sign-up", h.signUp)
-	mux.HandleFunc("/auth/sign-in", h.signIn)
+	mux.HandleFunc("/auth/signup", h.signUp)
+	mux.HandleFunc("/auth/signin", h.signIn)
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
