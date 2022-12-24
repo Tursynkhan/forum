@@ -18,13 +18,14 @@ func NewAuthService(repo repository.Autorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user models.User) (int, error) {
+func (s *AuthService) CreateUser(user models.User) error {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	//get user from DB
-}
+
+// func (s *AuthService) GenerateToken(username, password string) (string, error) {
+// 	//get user from DB
+// }
 
 func generatePasswordHash(password string) string {
 	hash := sha1.New()
