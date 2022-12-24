@@ -11,16 +11,16 @@ import (
 
 func Run() {
 	db, err := repository.InitDB(repository.Config{
-		Host:     "localhost",
-		Port:     "8080",
-		Username: "sqlite",
-		Password: "qwerty",
-		DBName:   "forumDB",
-		SSLMode:  "disable",
+		Username: "sqlite3",
+		DBName:   "forumDB.db",
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
+	if err := repository.CreateTables(db); err != nil {
+		log.Println(err)
+	}
+	defer db.Close()
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := delivery.NewHandler(services)
