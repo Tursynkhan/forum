@@ -2,9 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"log"
-
 	"forum/internal/models"
+	"log"
 )
 
 type AuthSql struct {
@@ -21,4 +20,11 @@ func (r *AuthSql) CreateUser(user models.User) error {
 		log.Println(err)
 	}
 	return nil
+}
+
+func (r *AuthSql) GetUserByName(username, password string) (models.User, error) {
+	// var user models.User
+	// query:=fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password=$2",usertable)
+	// err:=r.db.Get(&user,query,username,password)
+	// return user,err
 }
