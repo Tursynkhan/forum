@@ -20,7 +20,9 @@ const (
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			Username TEXT,
 			Email TEXT,
-			Password TEXT
+			Password TEXT,
+			RetypePassword TEXT,
+			Token TEXT
 		);`
 	postTable = `CREATE TABLE IF NOT EXISTS posts(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
