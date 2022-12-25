@@ -6,4 +6,6 @@ type User struct {
 	Email          string
 	Password       string
 	RepeatPassword string
+
+	Token string
 }
