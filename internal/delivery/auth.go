@@ -1,11 +1,10 @@
 package delivery
 
 import (
+	"forum/internal/models"
 	"log"
 	"net/http"
 	"text/template"
-
-	"forum/internal/models"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +49,9 @@ type signInInput struct {
 }
 
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/auth/signin" {
+		h.ErrorHandler(w, r, errStatus{http.StatusNotFound, http.StatusText(http.StatusNotFound)})
+	}
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./ui/templates/signIn.html")
 		if err != nil {
@@ -57,5 +59,10 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		}
 		err = ts.Execute(w, nil)
 	} else if r.Method == "POST" {
+		// name := r.FormValue("name")
+		// email := r.FormValue("email")
+		// if sessionToken,err:=h.services.GenerateToken(name,email);err!=nil{
+
+		// }
 	}
 }
