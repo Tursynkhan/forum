@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	ID             int
 	Username       string
@@ -7,5 +9,6 @@ type User struct {
 	Password       string
 	RepeatPassword string
 
-	Token string
+	Token      string
+	Expiretime time.Time
 }
