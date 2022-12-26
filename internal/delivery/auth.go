@@ -1,10 +1,11 @@
 package delivery
 
 import (
-	"forum/internal/models"
 	"log"
 	"net/http"
 	"text/template"
+
+	"forum/internal/models"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -59,10 +60,20 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		}
 		err = ts.Execute(w, nil)
 	} else if r.Method == "POST" {
-		// name := r.FormValue("name")
-		// email := r.FormValue("email")
-		// if sessionToken,err:=h.services.GenerateToken(name,email);err!=nil{
-
-		// }
+		name := r.FormValue("name")
+		email := r.FormValue("email")
+		sessionToken, expiresTime, err := h.services.GenerateToken(name, email)
+		if err != nil {
+			log.Println(err)
+			h.ErrorHandler(w, r, errStatus{http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)})
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:    "session_token",
+			Value:   sessionToken,
+			Expires: expiresTime,
+			Path:    "/",
+		})
+		http.Redirect(w, r, "/", 301)
 	}
 }
