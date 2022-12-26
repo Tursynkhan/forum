@@ -2,8 +2,10 @@ package repository
 
 import (
 	"database/sql"
-	"forum/internal/models"
 	"log"
+	"time"
+
+	"forum/internal/models"
 )
 
 type AuthSql struct {
@@ -22,9 +24,27 @@ func (r *AuthSql) CreateUser(user models.User) error {
 	return nil
 }
 
-func (r *AuthSql) GetUserByName(username, password string) (models.User, error) {
-	// var user models.User
-	// query:=fmt.Sprintf("SELECT id FROM %s WHERE username=$1 AND password=$2",usertable)
-	// err:=r.db.Get(&user,query,username,password)
-	// return user,err
+func (r *AuthSql) GetUser(username string) (models.User, error) {
+	rows, err := r.db.Query("SELECT Id,Username,Password from users WHERE username=? ", username)
+	if err != nil {
+		log.Println(err)
+	}
+	var user models.User
+	for rows.Next() {
+		err := rows.Scan(&user.ID, &user.Username, &user.Password)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+	}
+	return user, nil
+}
+
+func (r *AuthSql) SaveToken(username, sessionToken string, time time.Time) error {
+	_, err := r.db.Exec("UPDATE users SET Token=$1,ExpireTime=$2 WHERE Username=$3", sessionToken, time, username)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }

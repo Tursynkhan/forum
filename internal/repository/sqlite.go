@@ -18,11 +18,12 @@ type Config struct {
 const (
 	usertable = `CREATE TABLE IF NOT EXISTS users(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
-			Username TEXT,
-			Email TEXT,
+			Username TEXT UNIQUE,
+			Email TEXT UNIQUE,
 			Password TEXT,
 			RetypePassword TEXT,
-			Token TEXT
+			Token TEXT DEFAULT NULL,
+			ExpireTime DATETIME DEFAULT NULL 
 		);`
 	postTable = `CREATE TABLE IF NOT EXISTS posts(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
