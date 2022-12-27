@@ -37,7 +37,8 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			RepeatPassword: pswRepeat,
 		}
 		if err := h.services.Autorization.CreateUser(newUser); err != nil {
-			h.ErrorHandler(w, r, errStatus{http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)})
+			log.Println(err)
+			h.ErrorHandler(w, r, errStatus{http.StatusBadRequest, http.StatusText(http.StatusBadRequest)})
 			return
 		}
 		http.Redirect(w, r, "/auth/signin", 303)
