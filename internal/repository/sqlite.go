@@ -21,7 +21,6 @@ const (
 			Username TEXT UNIQUE,
 			Email TEXT UNIQUE,
 			Password TEXT,
-			RetypePassword TEXT,
 			Token TEXT DEFAULT NULL,
 			ExpireTime DATETIME DEFAULT NULL 
 		);`
