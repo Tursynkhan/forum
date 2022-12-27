@@ -27,15 +27,19 @@ func (r *AuthSql) CreateUser(user models.User) error {
 func (r *AuthSql) GetUser(username string) (models.User, error) {
 	rows, err := r.db.Query("SELECT Id,Username,Password from users WHERE username=? ", username)
 	if err != nil {
-		log.Println(err)
+		return models.User{}, err
 	}
 	var user models.User
 	for rows.Next() {
 		err := rows.Scan(&user.ID, &user.Username, &user.Password)
-		if err != nil {
+		if err == sql.ErrNoRows {
+			return models.User{}, nil
+		} else {
 			log.Println(err)
-			continue
 		}
+	}
+	if err = rows.Err(); err != nil {
+		return models.User{}, err
 	}
 	return user, nil
 }
