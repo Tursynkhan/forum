@@ -7,23 +7,24 @@ import (
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		h.ErrorHandler(w, r, errStatus{http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed)})
+	if r.URL.Path != "/" {
+		log.Println("home page: wrong url")
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-	if r.URL.Path != "/" {
-		h.ErrorHandler(w, r, errStatus{http.StatusNotFound, http.StatusText(http.StatusNotFound)})
+	if r.Method != http.MethodGet {
+		log.Println("home page:Method not allowed")
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 	ts, err := template.ParseFiles("./ui/templates/index.html")
 	if err != nil {
 		log.Println(err.Error())
-		h.ErrorHandler(w, r, errStatus{http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)})
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		h.ErrorHandler(w, r, errStatus{http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)})
+	if err = ts.Execute(w, nil); err != nil {
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
 	}
 }
