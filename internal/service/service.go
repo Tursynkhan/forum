@@ -1,17 +1,10 @@
 package service
 
 import (
-	"time"
-
-	"forum/internal/models"
 	"forum/internal/repository"
 )
 
 type (
-	Autorization interface {
-		CreateUser(user models.User) error
-		GenerateToken(username, password string) (string, time.Time, error)
-	}
 	Post    interface{}
 	Comment interface{}
 )
