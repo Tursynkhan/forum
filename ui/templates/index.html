@@ -11,15 +11,22 @@
     <header class="header">
         <div class="title">Forum</div>
         <div class="auth">
+            {{if .User.Username}}
+                <div class="username">{{.Username}}</div>
+                <div class="log-out">
+                    <a href="/">Log out</a>
+                </div>
+            {{else}}
             <div class="sign-up">
                 <a href="/auth/signup">Sign Up</a>
             </div>
             <div class="sign-in">
                 <a href="/auth/signin">Log in</a>
             </div>
+            {{end}}
         </div>
     </header>
-    <main class="container">
+    <main class="container-main">
         <div class="nav-bar">
             <form action="" method="post">
                 <select name="select">
