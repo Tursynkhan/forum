@@ -26,6 +26,7 @@ const salt = "hkhasdfa2454654asdf1asdf4a5sdf"
 type Autorization interface {
 	CreateUser(user models.User) error
 	GenerateToken(username, password string) (string, time.Time, error)
+	ParseToken(token string) (models.User, error)
 }
 type AuthService struct {
 	repo repository.Autorization
@@ -71,6 +72,10 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 		return "", time.Time{}, err
 	}
 	return sessioToken, expiresAt, nil
+}
+
+func (s *AuthService) ParseToken(token string) (models.User, error) {
+	return s.repo.GetToken(token)
 }
 
 func generatePasswordHash(password string) (string, error) {
