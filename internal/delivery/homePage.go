@@ -1,12 +1,26 @@
 package delivery
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"text/template"
+
+	"forum/internal/models"
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("myvalue").(models.User)
+	fmt.Println(user)
+	if !ok {
+		fmt.Println("a")
+		ts, err := template.ParseFiles("./ui/templates/index.html")
+		if err = ts.Execute(w, nil); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		return
+	}
 	if r.URL.Path != "/" {
 		log.Println("home page: wrong url")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
@@ -23,7 +37,7 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	if err = ts.Execute(w, nil); err != nil {
+	if err = ts.Execute(w, user); err != nil {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
