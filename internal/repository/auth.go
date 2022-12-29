@@ -16,6 +16,7 @@ type Autorization interface {
 	CreateUser(user models.User) error
 	GetUser(username string) (models.User, error)
 	SaveToken(username, sessionToken string, time time.Time) error
+	GetToken(token string) (models.User, error)
 }
 
 func NewAuthRepository(db *sql.DB) *AuthSql {
@@ -53,4 +54,21 @@ func (r *AuthSql) SaveToken(username, sessionToken string, time time.Time) error
 		return fmt.Errorf("repository: save token: %w", err)
 	}
 	return nil
+}
+
+func (r *AuthSql) GetToken(token string) (models.User, error) {
+	row, err := r.db.Query("SELECT Id,Username,Password from users WHERE Token=$1", token)
+	if err != nil {
+		return models.User{}, fmt.Errorf("repository: get user: %w", err)
+	}
+	var user models.User
+	for row.Next() {
+		err := row.Scan(&user.ID, &user.Username, &user.Password)
+		if err == sql.ErrNoRows {
+			return models.User{}, errors.New("No user with that username")
+		} else if err != nil {
+			return models.User{}, err
+		}
+	}
+	return user, nil
 }
