@@ -27,6 +27,7 @@ type Autorization interface {
 	CreateUser(user models.User) error
 	GenerateToken(username, password string) (string, time.Time, error)
 	ParseToken(token string) (models.User, error)
+	DeleteToken(token string) error
 }
 type AuthService struct {
 	repo repository.Autorization
@@ -65,17 +66,25 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 		return "", time.Time{}, fmt.Errorf("service: compare hash and password: %v: %w", err, ErrUserNotFound)
 	}
 
-	sessioToken := uuid.NewString()
+	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(120 * time.Second)
 
-	if err := s.repo.SaveToken(user.Username, sessioToken, expiresAt); err != nil {
+	if err := s.repo.SaveToken(user.Username, sessionToken, expiresAt); err != nil {
 		return "", time.Time{}, err
 	}
-	return sessioToken, expiresAt, nil
+	return sessionToken, expiresAt, nil
 }
 
 func (s *AuthService) ParseToken(token string) (models.User, error) {
-	return s.repo.GetToken(token)
+	user, err := s.repo.GetUserByToken(token)
+	if err != nil {
+		return models.User{}, err
+	}
+	return user, nil
+}
+
+func (s *AuthService) DeleteToken(token string) error {
+	return s.repo.DeleteToken(token)
 }
 
 func generatePasswordHash(password string) (string, error) {
