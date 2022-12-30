@@ -11,10 +11,10 @@
     <header class="header">
         <div class="title">Forum</div>
         <div class="auth">
-            {{if .User.Username}}
+            {{if .Username}}
                 <div class="username">{{.Username}}</div>
                 <div class="log-out">
-                    <a href="/">Log out</a>
+                    <a href="/auth/logout">Log out</a>
                 </div>
             {{else}}
             <div class="sign-up">
