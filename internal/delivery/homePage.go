@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"text/template"
@@ -10,10 +9,8 @@ import (
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value("myvalue").(models.User)
-	fmt.Println(user)
+	user, ok := r.Context().Value(key).(models.User)
 	if !ok {
-		fmt.Println("a")
 		ts, err := template.ParseFiles("./ui/templates/index.html")
 		if err = ts.Execute(w, nil); err != nil {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
