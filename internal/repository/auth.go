@@ -16,7 +16,8 @@ type Autorization interface {
 	CreateUser(user models.User) error
 	GetUser(username string) (models.User, error)
 	SaveToken(username, sessionToken string, time time.Time) error
-	GetToken(token string) (models.User, error)
+	GetUserByToken(token string) (models.User, error)
+	DeleteToken(token string) error
 }
 
 func NewAuthRepository(db *sql.DB) *AuthSql {
@@ -56,19 +57,27 @@ func (r *AuthSql) SaveToken(username, sessionToken string, time time.Time) error
 	return nil
 }
 
-func (r *AuthSql) GetToken(token string) (models.User, error) {
-	row, err := r.db.Query("SELECT Id,Username,Password from users WHERE Token=$1", token)
+func (r *AuthSql) GetUserByToken(token string) (models.User, error) {
+	row, err := r.db.Query("SELECT Id,Username,Password,ExpireTime from users WHERE Token=$1", token)
 	if err != nil {
-		return models.User{}, fmt.Errorf("repository: get user: %w", err)
+		return models.User{}, fmt.Errorf("repository: get token: %w", err)
 	}
 	var user models.User
 	for row.Next() {
-		err := row.Scan(&user.ID, &user.Username, &user.Password)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Expiretime)
 		if err == sql.ErrNoRows {
-			return models.User{}, errors.New("No user with that username")
+			return models.User{}, errors.New("No user with that token")
 		} else if err != nil {
 			return models.User{}, err
 		}
 	}
 	return user, nil
+}
+
+func (r *AuthSql) DeleteToken(token string) error {
+	_, err := r.db.Exec("UPDATE users set Token = NULL WHERE Token=$1", token)
+	if err != nil {
+		return fmt.Errorf("repository: delete token: %w", err)
+	}
+	return nil
 }
