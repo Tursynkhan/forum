@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreatePost | Forum</title>
+    <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    input{
+        width: 100%;
+      height: 30px;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      background-color: #f8f8f8;
+      font-size: 16px;
+      resize: none;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px 20px;
+      box-sizing: border-box;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      background-color: #f8f8f8;
+      font-size: 16px;
+      resize: none;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      font-size: 18px;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+    </style>
+</head>
+<body>
+    <h1>Create a New Post</h1>
+    <form method="POST" action="/create-post">
+        <label for="title"><b>Title</b></label><br>
+        <input type="text" name="title"><br>
+
+        <label for="content"><b>Content</b></label><br>
+        <textarea rows="10" cols="30" name="content"></textarea><br>
+        
+        <label for="categories">Categories</label><br>
+        <select multiple id="categories "name="categories">
+            <option value="news">News</option>
+            <option value="sports">Sports</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="technology">Technology</option>
+            <option value="other">Other</option>
+        </select><br>
+        <button type="submit">Create</button> 
+    </form>
+</body>
+</html>

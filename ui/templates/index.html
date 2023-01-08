@@ -29,19 +29,27 @@
     <main class="container-main">
         <div class="nav-bar">
             <form action="" method="post">
-                <select name="select">
-                    <option selected value="categories">categories</option>
-                    <option  value="alem">alem</option>
-                    <option value="university">university</option>
+                <select multiple name="select">
+                    <option value="news">News</option>
+                    <option value="sports">Sports</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="technology">Technology</option>
+                    <option value="other">Other</option>
                 </select>
             </form>
-            <div class="latest-post">
-                <a href="">Latest</a>
+            <div class="created-post">
+                <a href="">Created post</a>
             </div>
-            <div class="top-post">
-                <a href="">Top</a>
+            <div class="liked-post">
+                <a href="">Liked post</a>
             </div>
+            {{if .Username}}
+            <div class="create-post">
+                <a href="/create-post">New Post</a>
+            </div>
+            {{end}}
         </div>
+
     </main>
     <footer class="footer"></footer>
 </body>
