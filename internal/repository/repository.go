@@ -5,7 +5,6 @@ import (
 )
 
 type (
-	Post    interface{}
 	Comment interface{}
 )
 
@@ -18,5 +17,6 @@ type Repository struct {
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		Autorization: NewAuthRepository(db),
+		Post:         NewPostRepository(db),
 	}
 }
