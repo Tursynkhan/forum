@@ -26,6 +26,7 @@ func Run() {
 	handlers := delivery.NewHandler(services)
 
 	server := new(server.Server)
+	log.Println("server start")
 	if err := server.ServerRun("8080", handlers.InitRoutes()); err != nil {
 		log.Fatalf("error ocured while running http server: %s", err.Error())
 	}
