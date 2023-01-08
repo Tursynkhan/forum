@@ -31,14 +31,40 @@ const (
 			UserId INTEGER,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE
 		);`
-	commentTable = `CREATE TABLE IF NOT EXISTS comment( 
+	categoryTable = `CREATE TABLE IF NOT EXISTS categories(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
+			Name TEXT
+			);`
+	postCategoryTable = `CREATE TABLE IF NOT EXISTS post_categories(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
+			PostId INTEGER,
+			CategoryId INTEGER,
+			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE,
+			FOREIGN KEY (CategoryId) REFERENCES categories (Id) ON DELETE CASCADE
+			);`
+	commentTable = `CREATE TABLE IF NOT EXISTS comments( 
 			Id INTEGER PRIMARY  KEY AUTOINCREMENT,
 			Content TEXT,
 			UserId INTEGER,
 			PostId INTEGER,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
 			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
-		);`
+			);`
+	postLikeTable = `CREATE TABLE IF NOT EXISTS posts_like(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
+			UserId INTEGER,
+			PostId INTEGER,
+			Positive INTEGER,
+			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
+			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
+			);`
+	commentLikeTable = `CREATE TABLE IF NOT EXISTS comments_like(
+			UserId INTEGER,
+			CommentId INTEGER,
+			Positive INTEGER,
+			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
+			FOREIGN KEY (CommentId) REFERENCES comments (Id) ON DELETE CASCADE
+			);`
 )
 
 func InitDB(cfg Config) (*sql.DB, error) {
@@ -54,7 +80,7 @@ func InitDB(cfg Config) (*sql.DB, error) {
 }
 
 func CreateTables(db *sql.DB) error {
-	allTables := []string{usertable, postTable, commentTable}
+	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable}
 	for _, table := range allTables {
 		_, err := db.Exec(table)
 		if err != nil {
