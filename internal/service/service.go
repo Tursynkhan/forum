@@ -5,7 +5,6 @@ import (
 )
 
 type (
-	Post    interface{}
 	Comment interface{}
 )
 
@@ -18,5 +17,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Autorization: NewAuthService(repos.Autorization),
+		Post:         NewPostService(repos.Post),
 	}
 }

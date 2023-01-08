@@ -21,8 +21,6 @@ var (
 	ErrUserExist       = errors.New("User exist")
 )
 
-const salt = "hkhasdfa2454654asdf1asdf4a5sdf"
-
 type Autorization interface {
 	CreateUser(user models.User) error
 	GenerateToken(username, password string) (string, time.Time, error)
