@@ -11,8 +11,8 @@
     <header class="header">
         <div class="title">Forum</div>
         <div class="auth">
-            {{if .Username}}
-                <div class="username">{{.Username}}</div>
+            {{if .User.Username}}
+                <div class="username">{{.User.Username}}</div>
                 <div class="log-out">
                     <a href="/auth/logout">Log out</a>
                 </div>
@@ -29,12 +29,13 @@
     <main class="container-main">
         <div class="nav-bar">
             <form action="" method="post">
-                <select multiple name="select">
-                    <option value="news">News</option>
-                    <option value="sports">Sports</option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="technology">Technology</option>
-                    <option value="other">Other</option>
+                <select name="select">
+                    <option value="Getting Help">Getting Help</option>
+                    <option value="Releases">Releases</option>
+                    <option value="Technical Discussion">Technical Discussion</option>
+                    <option value="Community">Community</option>
+                    <option value="Jobs">Jobs</option>
+                    <option value="Site Feedback">Site Feedback</option>
                 </select>
             </form>
             <div class="created-post">
@@ -49,7 +50,13 @@
             </div>
             {{end}}
         </div>
-
+        <div class="posts">
+            {{range .Posts}}
+                <h3>
+                    {{.Title}}
+                </h3>
+                {{.Content}}
+        </div>
     </main>
     <footer class="footer"></footer>
 </body>
