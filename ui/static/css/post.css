@@ -1,0 +1,39 @@
+body{
+    max-height: 100%;
+    margin: 0 auto;
+    max-width: 60%;
+}
+a{
+    text-decoration: none;
+}
+.header{
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 0 10px 0;
+    margin-bottom: 50px;
+    text-decoration: none;
+    background-color: #E0EBF5;
+}
+.auth{
+    display: flex;
+}
+.sign-up{
+    margin-right: 10px;
+}
+.post {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+
+  .comments {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+
+  .comment-form {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }

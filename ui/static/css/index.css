@@ -3,6 +3,9 @@ body{
     margin: 0 auto;
     max-width: 60%;
 }
+a{
+    text-decoration: none;
+}
 .header{
     display: flex;
     justify-content: space-between;
@@ -25,4 +28,22 @@ body{
 }
 .nav-bar form{
     margin-right: 10px;
+}
+.right-navbar{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.filters{
+    display: flex;
+}
+.create-post{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.post-title{
+    display: block;
+    padding: 15px 0 15px 0;
+    border-bottom: 1px solid black;
 }
