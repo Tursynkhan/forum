@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/post.css">
+    <title>Post | Forum</title>
+</head>
+<body>
+    <header class="header">
+        <div class="title">Forum</div>
+        <div class="auth">
+            {{if .User.Username}}
+                <div class="username">{{.User.Username}}</div>
+                <div class="log-out">
+                    <a href="/auth/logout">Log out</a>
+                </div>
+            {{else}}
+            <div class="sign-up">
+                <a href="/auth/signup">Sign Up</a>
+            </div>
+            <div class="sign-in">
+                <a href="/auth/signin">Log in</a>
+            </div>
+            {{end}}
+        </div>
+    </header>
+    <div class="container">
+        <h3>{{.Post.Title}}</h3>
+        <div class="post">
+            <p>{{.Post.Content}}</p>
+        </div>
+
+        <h4>Comments</h4>
+        <div class="comments">
+            <div id="comments-list">
+            </div>
+        </div>
+
+        <h4>Leave a Comment</h4>
+        <form class="comment-form" method="POST">
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment" required></textarea>
+            <br>
+            <button type="submit">Post Comment</button>
+        </form>
+    </div>
+</body>
+</html>
