@@ -54,17 +54,24 @@ const (
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			UserId INTEGER,
 			PostId INTEGER,
-			Positive INTEGER,
+			Positive BOOLEAN,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
 			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
 			);`
 	commentLikeTable = `CREATE TABLE IF NOT EXISTS comments_like(
 			UserId INTEGER,
 			CommentId INTEGER,
-			Positive INTEGER,
+			Positive BOOLEAN,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
 			FOREIGN KEY (CommentId) REFERENCES comments (Id) ON DELETE CASCADE
 			);`
+	insertCategories = `INSERT INTO categories(Name) VALUES
+			('Getting Help'),
+			('Releases'),
+			('Technical Discussion'),
+			('Community'),
+			('Jobs'),
+			('Site Feedback');`
 )
 
 func InitDB(cfg Config) (*sql.DB, error) {
@@ -80,7 +87,7 @@ func InitDB(cfg Config) (*sql.DB, error) {
 }
 
 func CreateTables(db *sql.DB) error {
-	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable}
+	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable, insertCategories}
 	for _, table := range allTables {
 		_, err := db.Exec(table)
 		if err != nil {
