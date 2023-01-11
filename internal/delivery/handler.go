@@ -23,8 +23,6 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 
 	mux.HandleFunc("/create-post", h.userIdentity(h.createPost))
 	mux.HandleFunc("/get-post", h.userIdentity(h.getPost))
-	// mux.HandleFunc("/delete-post", h.userIdentity(h.deletePost))
-	// mux.HandleFunc("/update-post", h.userIdentity(h.updatePost))
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
