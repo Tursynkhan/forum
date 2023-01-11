@@ -9,7 +9,7 @@
 </head>
 <body>
     <header class="header">
-        <div class="title">Forum</div>
+        <a href="/">Forum</a>
         <div class="auth">
             {{if .User.Username}}
                 <div class="username">{{.User.Username}}</div>
@@ -53,16 +53,16 @@
                 <div class="create-post">
                     <a href="/create-post">New Topic</a>
                 </div>
+                {{end}}
             </div>
-            {{end}}
         </div>
-        <div class="posts">
-            {{range .Posts}}
-            <a class="post-title" href="/get-post?id={{.Title}}">
-                {{.Title}}
-            </a>
-            {{end}}
-        </div>
+       <div class="posts">
+           {{range .Posts}}
+           <a class="post-title" href="/get-post?id={{.ID}}">
+               {{.Title}}
+           </a>
+           {{end}}
+       </div>
     </main>
     <footer class="footer"></footer>
 </body>

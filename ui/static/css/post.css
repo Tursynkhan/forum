@@ -37,3 +37,7 @@ a{
     padding: 20px;
     border: 1px solid #ccc;
   }
+.header__post{
+    display: flex;
+    justify-content: space-between;
+}
