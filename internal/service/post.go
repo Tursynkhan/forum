@@ -8,9 +8,7 @@ import (
 type Post interface {
 	CreatePost(post models.Post) error
 	GetAllPosts() ([]models.Post, error)
-	GetPost(title string) (models.Post, error)
-	// DeletePost()
-	// UpdatePost()
+	GetPost(id int) (models.Post, error)
 }
 
 type PostService struct {
@@ -29,6 +27,6 @@ func (s *PostService) GetAllPosts() ([]models.Post, error) {
 	return s.repo.GetAllPosts()
 }
 
-func (s *PostService) GetPost(title string) (models.Post, error) {
-	return s.repo.GetPost(title)
+func (s *PostService) GetPost(id int) (models.Post, error) {
+	return s.repo.GetPost(id)
 }
