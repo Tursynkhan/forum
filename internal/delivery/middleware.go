@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -21,8 +22,9 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 		var user models.User
 		token, err := r.Cookie("session_token")
 		if err != nil {
+			fmt.Println(err)
 			if errors.Is(err, http.ErrNoCookie) {
-				next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "values", models.User{})))
+				next.ServeHTTP(w, r)
 				return
 			}
 			h.errorHandler(w, http.StatusBadRequest, err.Error())
