@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"forum/internal/models"
@@ -47,7 +48,7 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-
+		fmt.Println("Posts:", newPost)
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
 		log.Println("Create Post: Method not allowed")
@@ -56,16 +57,14 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
-	// if r.URL.Path != "/get-post" {
-	// 	h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-	// 	return
-	// }
 	if r.Method == "GET" {
-		user := r.Context().Value(key).(models.User)
-
-		title := r.URL.Query().Get("id")
-		fmt.Println(title)
-		post, err := h.services.Post.GetPost(title)
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+		}
+		id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+		fmt.Println("Get Post: This is Id:", id)
+		post, err := h.services.Post.GetPost(id)
+		fmt.Println("Get Post: This is post:", post)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -91,10 +90,4 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 		log.Println("Get Post: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 	}
-}
-
-func (h *Handler) deletePost(w http.ResponseWriter, r *http.Request) {
-}
-
-func (h *Handler) updatePost(w http.ResponseWriter, r *http.Request) {
 }
