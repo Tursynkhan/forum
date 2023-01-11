@@ -23,15 +23,18 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	}
 	user, ok := r.Context().Value(key).(models.User)
 	if !ok {
+		posts, err = h.services.GetAllPosts()
+		info := models.Info{
+			Posts: posts,
+		}
 		ts, err := template.ParseFiles("./ui/templates/index.html")
-		if err = ts.Execute(w, nil); err != nil {
+		if err = ts.Execute(w, info); err != nil {
 			log.Printf("homepage: execute: %v", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		return
 	}
-	posts, err = h.services.GetAllPosts()
 	if err != nil {
 		log.Println("home page: get all posts", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
