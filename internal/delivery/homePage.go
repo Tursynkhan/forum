@@ -9,15 +9,15 @@ import (
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
-	var posts []models.Post
+	var posts []models.PostInfo
 	var err error
 	if r.URL.Path != "/" {
-		log.Println("home page: wrong url")
+		log.Println("home page : wrong url")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 	if r.Method != http.MethodGet {
-		log.Println("home page:Method not allowed")
+		log.Println("home page : Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
@@ -29,14 +29,14 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		}
 		ts, err := template.ParseFiles("./ui/templates/index.html")
 		if err = ts.Execute(w, info); err != nil {
-			log.Printf("homepage: execute: %v", err)
+			log.Printf("homepage : execute : %v", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		return
 	}
 	if err != nil {
-		log.Println("home page: get all posts", err)
+		log.Println("home page : get all posts", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
@@ -51,7 +51,7 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err = ts.Execute(w, info); err != nil {
-		log.Println("home page: execute error:", err)
+		log.Println("home page : execute error :", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
