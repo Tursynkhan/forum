@@ -32,7 +32,7 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 		}
 		user, err = h.services.Autorization.ParseToken(token.Value)
 		if err != nil {
-			log.Printf("userIdentity: parse token %v", err)
+			log.Printf("userIdentity : parse token %v", err)
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
