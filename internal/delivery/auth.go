@@ -92,7 +92,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/auth/logout" {
-		log.Println("Sign In:Wrong URL Path")
+		log.Println("Sign In : Wrong URL Path")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
@@ -115,7 +115,7 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 		})
 		http.Redirect(w, r, "/", 301)
 	} else {
-		log.Println("Logout: Method Not Allowed")
+		log.Println("Logout : Method Not Allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
