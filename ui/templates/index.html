@@ -51,7 +51,7 @@
                 </div>
                 {{if .User.Username}}
                 <div class="create-post">
-                    <a href="/create-post">New Topic</a>
+                    <a href="/create-post">New Post</a>
                 </div>
                 {{end}}
             </div>
@@ -59,6 +59,7 @@
        <div class="posts">
            {{range .Posts}}
            <a class="post-title" href="/get-post?id={{.ID}}">
+                {{.Author}}
                {{.Title}}
            </a>
            {{end}}
