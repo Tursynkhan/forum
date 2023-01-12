@@ -15,7 +15,6 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-
 	if r.Method == "GET" {
 		ts, err := template.ParseFiles("./ui/templates/createPost.html")
 		if err != nil {
@@ -30,6 +29,10 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if r.Method == "POST" {
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+			http.Redirect(w, r, "/", 302)
+		}
 		err := r.ParseForm()
 		if err != nil {
 			log.Println("error parse form :", err)
@@ -37,18 +40,23 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		}
 		title := r.PostFormValue("title")
 		content := r.PostFormValue("content")
-		// categories := r.Form["categories"]
+		categories := r.Form["categories"]
 		newPost := models.Post{
+			UserID:  user.ID,
 			Title:   title,
 			Content: content,
 		}
-
-		if err = h.services.Post.CreatePost(newPost); err != nil {
+		postId, err := h.services.Post.CreatePost(newPost)
+		if err != nil {
 			log.Printf("Post: Create Post: %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		fmt.Println("Posts:", newPost)
+		if err = h.services.Post.CreatePostCategory(postId, categories); err != nil {
+			log.Printf("Post: Create PostCategory : %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
 		log.Println("Create Post: Method not allowed")
