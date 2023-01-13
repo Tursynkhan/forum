@@ -33,7 +33,7 @@ const (
 		);`
 	categoryTable = `CREATE TABLE IF NOT EXISTS categories(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
-			Name TEXT
+			Name TEXT UNIQUE
 			);`
 	postCategoryTable = `CREATE TABLE IF NOT EXISTS post_categories(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
