@@ -23,11 +23,16 @@ func NewPostRepository(db *sql.DB) *PostRepository {
 }
 
 func (r *PostRepository) CreatePost(post models.Post) (int, error) {
-	_, err := r.db.Exec("INSERT INTO posts (Title,Content,UserId) VALUES (?,?,?)", post.Title, post.Content, post.UserID)
+	res, err := r.db.Exec("INSERT INTO posts (Title,Content,UserId) VALUES (?,?,?)", post.Title, post.Content, post.UserID)
 	if err != nil {
 		return 0, fmt.Errorf("repository : create post : %w", err)
 	}
-	return 0, nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println("Create Post: LastInsertId: ", id)
+	return int(id), nil
 }
 
 func (r *PostRepository) CreatePostCategory(postId int, categories []string) error {
@@ -48,17 +53,17 @@ func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
 	var posts []models.PostInfo
 	for rows.Next() {
 		p := models.PostInfo{}
-		// categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.id = post_categories.CategoryId WHERE postid = ?", &p.ID)
-		// for categories_rows.Next() {
-		// 	category := ""
-		// 	categories_rows.Scan(&category)
-		// 	p.Categories = append(p.Categories, category)
-		// }
 		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content)
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
+		}
+		categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &p.ID)
+		for categories_rows.Next() {
+			category := ""
+			categories_rows.Scan(&category)
+			p.Categories = append(p.Categories, category)
 		}
 		posts = append(posts, p)
 	}
@@ -77,6 +82,12 @@ func (r *PostRepository) GetPost(id int) (models.PostInfo, error) {
 			return models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return models.PostInfo{}, err
+		}
+		categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &post.ID)
+		for categories_rows.Next() {
+			category := ""
+			categories_rows.Scan(&category)
+			post.Categories = append(post.Categories, category)
 		}
 	}
 	return post, nil
