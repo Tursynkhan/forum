@@ -1,9 +1,9 @@
 package models
 
 type PostInfo struct {
-	ID     int
-	Author string
-	// Categories []string
-	Title   string
-	Content string
+	ID         int
+	Author     string
+	Categories []string
+	Title      string
+	Content    string
 }
