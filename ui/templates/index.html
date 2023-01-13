@@ -58,10 +58,18 @@
         </div>
        <div class="posts">
            {{range .Posts}}
+           <p hidden>{{.ID}}</p>
+           <div class="post-author">
+                From: {{.Author}}
+           </div>
            <a class="post-title" href="/get-post?id={{.ID}}">
-                {{.Author}}
-               {{.Title}}
+               Title: {{.Title}}
            </a>
+           <div class="categories">
+            {{range .Categories}}
+                {{.}}
+            {{end}}
+           </div>
            {{end}}
        </div>
     </main>

@@ -33,6 +33,11 @@
         <div class="post">
             <p>{{.Post.Content}}</p>
         </div>
+        <div class="tags">Tags:
+            {{range .Post.Categories}}
+                {{.}}
+            {{end}}
+        </div>
         <h4>Comments</h4>
         <div class="comments">
             <div id="comments-list">

@@ -46,6 +46,8 @@ a{
 .post-title{
     display: block;
     padding: 15px 0 15px 0;
-    border-bottom: 1px solid black;
 }
+.categories{
+    border-bottom: 1px solid black;
 
+}
