@@ -46,14 +46,14 @@ func (r *PostRepository) CreatePostCategory(postId int, categories []string) err
 }
 
 func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
-	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content from posts JOIN users ON users.Id = posts.UserId")
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId from posts JOIN users ON users.Id = posts.UserId")
 	if err != nil {
 		return []models.PostInfo{}, fmt.Errorf("repository : get all posts : %w", err)
 	}
 	var posts []models.PostInfo
 	for rows.Next() {
 		p := models.PostInfo{}
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
@@ -71,13 +71,13 @@ func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
 }
 
 func (r *PostRepository) GetPost(id int) (models.PostInfo, error) {
-	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content from posts JOIN users ON users.Id = posts.UserId WHERE posts.Id=$1", id)
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId from posts JOIN users ON users.Id = posts.UserId WHERE posts.Id=$1", id)
 	if err != nil {
 		return models.PostInfo{}, fmt.Errorf("repository : get all posts: %w", err)
 	}
 	var post models.PostInfo
 	for rows.Next() {
-		err := rows.Scan(&post.ID, &post.Author, &post.Title, &post.Content)
+		err := rows.Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.UserId)
 		if err == sql.ErrNoRows {
 			return models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
