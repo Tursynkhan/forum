@@ -4,10 +4,6 @@ import (
 	"forum/internal/repository"
 )
 
-type (
-	Comment interface{}
-)
-
 type Service struct {
 	Autorization
 	Post
@@ -18,5 +14,6 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Autorization: NewAuthService(repos.Autorization),
 		Post:         NewPostService(repos.Post),
+		Comment:      NewCommentService(repos.Comment),
 	}
 }
