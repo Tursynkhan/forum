@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"text/template"
@@ -25,7 +24,10 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value(key).(models.User)
 	if !ok {
 		posts, err = h.services.GetAllPosts()
-		fmt.Println("homePage1: GetAllPosts:", posts)
+		if err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 
 		info := models.Info{
 			Posts: posts,
@@ -39,7 +41,6 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	posts, err = h.services.GetAllPosts()
-	fmt.Println("homePage2: GetAllPosts:", posts)
 	if err != nil {
 		log.Println("home page : get all posts", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
