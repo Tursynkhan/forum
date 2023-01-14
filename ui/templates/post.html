@@ -27,8 +27,11 @@
         </div>
     </header>
     <div class="container">
+        <div class="author">
+            Author:{{.Post.Author}}
+        </div>
         <div class="header__post">
-            <div class="title">{{.Post.Title}}</div>
+            <div class="title">Title:{{.Post.Title}}</div>
         </div>
         <div class="post">
             <p>{{.Post.Content}}</p>
@@ -41,11 +44,18 @@
         <h4>Comments</h4>
         <div class="comments">
             <div id="comments-list">
+                {{range .Comments}}
+                <div class="comment-item">
+                    {{.Content}}
+                </div>
+                {{end}}
             </div>
         </div>
 
         <h4>Leave a Comment</h4>
-        <form class="comment-form" method="POST">
+        <form class="comment-form" method="POST" action="/create-comment">
+            <input type="hidden" name ="postId"value="{{.Post.ID}}">
+            <input type="hidden" name ="uerId" value="{{.Post.UserId}}">
             <label for="comment">Comment:</label>
             <textarea id="comment" name="comment" required></textarea>
             <br>
