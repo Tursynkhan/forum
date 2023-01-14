@@ -6,4 +6,5 @@ type PostInfo struct {
 	Categories []string
 	Title      string
 	Content    string
+	UserId     int
 }
