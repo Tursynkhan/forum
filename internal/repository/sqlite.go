@@ -59,19 +59,21 @@ const (
 			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
 			);`
 	commentLikeTable = `CREATE TABLE IF NOT EXISTS comments_like(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			UserId INTEGER,
 			CommentId INTEGER,
 			Positive BOOLEAN,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE,
 			FOREIGN KEY (CommentId) REFERENCES comments (Id) ON DELETE CASCADE
 			);`
-	insertCategories = `INSERT INTO categories(Name) VALUES
+	insertCategories = `INSERT OR IGNORE INTO categories(Name) VALUES
 			('Getting Help'),
 			('Releases'),
 			('Technical Discussion'),
 			('Community'),
 			('Jobs'),
-			('Site Feedback');`
+			('Site Feedback');
+			`
 )
 
 func InitDB(cfg Config) (*sql.DB, error) {
