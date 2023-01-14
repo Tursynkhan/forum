@@ -31,7 +31,8 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		user, ok := r.Context().Value(key).(models.User)
 		if !ok {
-			http.Redirect(w, r, "/", 302)
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
 		}
 		err := r.ParseForm()
 		if err != nil {
@@ -68,9 +69,13 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		user, ok := r.Context().Value(key).(models.User)
 		if !ok {
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
 		}
+
 		id, _ := strconv.Atoi(r.URL.Query().Get("id"))
 		fmt.Println("Get Post: This is Id:", id)
+
 		post, err := h.services.Post.GetPost(id)
 		fmt.Println("Get Post: This is post:", post)
 		if err != nil {
@@ -78,15 +83,23 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+
+		comments, err := h.services.GetAllComments(id)
+		if err != nil {
+			log.Println("Get Post: GetAllComments : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		info := models.Info{
+			User:     user,
+			Post:     post,
+			Comments: comments,
+		}
 		ts, err := template.ParseFiles("./ui/templates/post.html")
 		if err != nil {
 			log.Printf("Get Post: Execute:%v", err)
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
-		}
-		info := models.Info{
-			User: user,
-			Post: post,
 		}
 		err = ts.Execute(w, info)
 		if err != nil {
