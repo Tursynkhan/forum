@@ -112,3 +112,31 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 	}
 }
+
+func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/post-like" {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	if r.Method == "GET" {
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
+		}
+		id, _ := strconv.Atoi(r.URL.Query().Get("id"))
+		
+		newPostLike := models.PostLike{
+			UserID:   user.ID,
+			PostID:   id,
+			Positive: 1,
+		}
+		if err := h.services.CreateLikePost(newPostLike); err != nil {
+			log.Printf("Post: CreateLikePost: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		Idpost := strconv.Itoa(id)
+		http.Redirect(w, r, "/get-post?id="+Idpost, 302)
+	}
+}
