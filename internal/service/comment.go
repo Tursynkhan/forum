@@ -5,12 +5,10 @@ import (
 	"forum/internal/repository"
 )
 
-type (
-	Comment interface {
-		CreateComment(comment models.Comment) error
-		GetAllComments(postId int) ([]models.Comment, error)
-	}
-)
+type Comment interface {
+	CreateComment(comment models.Comment) error
+	GetAllComments(postId int) ([]models.Comment, error)
+}
 
 type CommentService struct {
 	repo repository.Comment

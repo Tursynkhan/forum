@@ -8,6 +8,7 @@ type Service struct {
 	Autorization
 	Post
 	Comment
+	VotePost
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -15,5 +16,6 @@ func NewService(repos *repository.Repository) *Service {
 		Autorization: NewAuthService(repos.Autorization),
 		Post:         NewPostService(repos.Post),
 		Comment:      NewCommentService(repos.Comment),
+		VotePost:     NewVotePostService(repos.VotePost),
 	}
 }
