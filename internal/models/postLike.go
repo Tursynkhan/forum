@@ -4,5 +4,5 @@ type PostLike struct {
 	ID       int
 	UserID   int
 	PostID   int
-	Positive bool
+	Positive int
 }
