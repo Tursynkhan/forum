@@ -31,7 +31,6 @@ func (r *PostRepository) CreatePost(post models.Post) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println("Create Post: LastInsertId: ", id)
 	return int(id), nil
 }
 
