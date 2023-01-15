@@ -27,26 +27,38 @@
         </div>
     </header>
     <div class="container">
-        <div class="author">
-            Author:{{.Post.Author}}
-        </div>
-        <div class="header__post">
-            <div class="title">Title:{{.Post.Title}}</div>
-        </div>
         <div class="post">
-            <p>{{.Post.Content}}</p>
-        </div>
-        <div class="tags">Tags:
-            {{range .Post.Categories}}
-                {{.}}
-            {{end}}
+            <div class="author">
+                Author:{{.Post.Author}}
+            </div>
+            <div class="header__post">
+                <div class="title">Title:{{.Post.Title}}</div>
+            </div>
+            <div class="post">
+                <p>{{.Post.Content}}</p>
+            </div>
+            <div class="tags">Tags:
+                {{range .Post.Categories}}
+                    {{.}}
+                {{end}}
+            </div>
+            <div class="reaction">
+                <a href="/post-like">Like</a>
+                <a href="/post-dislike">Dislike</a>
+            </div>
         </div>
         <h4>Comments</h4>
         <div class="comments">
             <div id="comments-list">
                 {{range .Comments}}
                 <div class="comment-item">
-                    {{.Content}}
+                    <div class="content">
+                        {{.Content}}
+                    </div>
+                    <div class="reaction">
+                        <a href="/comment-like">Like</a>
+                        <a href="/comment-dislike">Dislike</a>
+                    </div>
                 </div>
                 {{end}}
             </div>
