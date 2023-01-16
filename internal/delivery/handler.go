@@ -1,9 +1,8 @@
 package delivery
 
 import (
-	"net/http"
-
 	"forum/internal/service"
+	"net/http"
 )
 
 type Handler struct {
@@ -22,10 +21,10 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("/auth/logout", h.logout)
 
 	mux.HandleFunc("/create-post", h.userIdentity(h.createPost))
-	mux.HandleFunc("/get-post", h.userIdentity(h.getPost))
-	mux.HandleFunc("/post-like",h.userIdentity(h.postLike))
-	
-	mux.HandleFunc("/create-comment",h.userIdentity(h.createComment))
+	mux.HandleFunc("/get-post/", h.userIdentity(h.getPost))
+	mux.HandleFunc("/post-like/", h.userIdentity(h.postLike))
+
+	mux.HandleFunc("/create-comment", h.userIdentity(h.createComment))
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())

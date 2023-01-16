@@ -1,10 +1,9 @@
 package delivery
 
 import (
+	"forum/internal/models"
 	"net/http"
 	"strconv"
-
-	"forum/internal/models"
 )
 
 func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +26,6 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		Idpost := strconv.Itoa(postId)
-		http.Redirect(w, r, "/get-post?id="+Idpost, 302)
+		http.Redirect(w, r, "/get-post/"+Idpost, 302)
 	}
 }
