@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+	"errors"
 	"forum/internal/models"
 	"forum/internal/repository"
 )
@@ -18,5 +20,21 @@ func NewVotePostService(repo repository.VotePost) *VotePostService {
 }
 
 func (s *VotePostService) CreateLikePost(postLike models.PostLike) error {
-	return s.repo.CreateLikePost(postLike)
+	status, err := s.repo.GetStatusPostLike(postLike)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return s.repo.CreateLikePost(postLike)
+		}
+		return err
+	}
+	if status == 1 {
+		if err := s.repo.UpdateStatusPostLike(0, postLike); err != nil {
+			return err
+		}
+	} else {
+		if err := s.repo.UpdateStatusPostLike(1, postLike); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -3,11 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
-	"net/mail"
-	"time"
-
 	"forum/internal/models"
 	"forum/internal/repository"
+	"net/mail"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -27,6 +26,7 @@ type Autorization interface {
 	ParseToken(token string) (models.User, error)
 	DeleteToken(token string) error
 }
+
 type AuthService struct {
 	repo repository.Autorization
 }
@@ -61,7 +61,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 		return "", time.Time{}, ErrUserNotFound
 	}
 	if err := checkHash(user.Password, password); err != nil {
-		return "", time.Time{}, fmt.Errorf("service: compare hash and password: %v: %w", err, ErrUserNotFound)
+		return "", time.Time{}, fmt.Errorf("service : compare hash and password : %v: %w", err, ErrUserNotFound)
 	}
 
 	sessionToken := uuid.NewString()
