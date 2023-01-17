@@ -9,6 +9,7 @@ type Repository struct {
 	Post
 	Comment
 	VotePost
+	VoteComment
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -17,5 +18,6 @@ func NewRepository(db *sql.DB) *Repository {
 		Post:         NewPostRepository(db),
 		Comment:      NewCommentRepository(db),
 		VotePost:     NewVotePostRepository(db),
+		VoteComment:  NewVoteCommentRepository(db),
 	}
 }
