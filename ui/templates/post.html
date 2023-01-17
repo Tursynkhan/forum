@@ -44,7 +44,10 @@
             </div>
             <div class="reaction">
                 <a href="/post-like/{{.Post.ID}}">Like</a>
+                <span class="count-likes">{{.PostLike.Likes}}</span>
                 <a href="/post-dislike/{{.Post.ID}}">Dislike</a>
+                <span class="count-dislikes">{{.PostLike.Dislikes}}</span>
+
             </div>
         </div>
         <h4>Comments</h4>
@@ -56,8 +59,8 @@
                         {{.Content}}
                     </div>
                     <div class="reaction">
-                        <a href="/comment-like">Like</a>
-                        <a href="/comment-dislike">Dislike</a>
+                        <a href="/comment-like/{{.ID}}">Like</a>
+                        <a href="/comment-dislike/{{.ID}}">Dislike</a>
                     </div>
                 </div>
                 {{end}}
