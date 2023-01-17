@@ -13,6 +13,9 @@ type VotePostService struct {
 
 type VotePost interface {
 	CreateLikePost(postLike models.PostLike) error
+	CreateDisLikePost(postLike models.PostLike) error
+	GetAllLikesByPostId(postId int) (int, error)
+	GetAllDislikesByPostId(postId int) (int, error)
 }
 
 func NewVotePostService(repo repository.VotePost) *VotePostService {
@@ -37,4 +40,35 @@ func (s *VotePostService) CreateLikePost(postLike models.PostLike) error {
 		}
 	}
 	return nil
+}
+
+func (s *VotePostService) CreateDisLikePost(postLike models.PostLike) error {
+	status, err := s.repo.GetStatusPostLike(postLike)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return s.repo.CreateDisLikePost(postLike)
+		}
+	}
+	if status == 1 {
+		if err := s.repo.UpdateStatusPostLike(-1, postLike); err != nil {
+			return err
+		}
+	} else if status == -1 {
+		if err := s.repo.UpdateStatusPostLike(0, postLike); err != nil {
+			return err
+		}
+	} else {
+		if err := s.repo.UpdateStatusPostLike(-1, postLike); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *VotePostService) GetAllLikesByPostId(postId int) (int, error) {
+	return s.repo.GetAllLikesByPostId(postId)
+}
+
+func (s *VotePostService) GetAllDislikesByPostId(postId int) (int, error) {
+	return s.repo.GetAllDislikesByPostId(postId)
 }
