@@ -2,8 +2,10 @@ package delivery
 
 import (
 	"forum/internal/models"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +28,52 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		Idpost := strconv.Itoa(postId)
+		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+	}
+}
+
+func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
+		}
+		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-like/"))
+		newCommentLike := models.CommentLike{
+			UserID:    user.ID,
+			CommentID: id,
+			Status:    1,
+		}
+		if err := h.services.CreateLikeComment(newCommentLike); err != nil {
+			log.Printf("Post: CreateLikePost: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		Idpost := strconv.Itoa(id)
+		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+	}
+}
+
+func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
+		}
+		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-dislike/"))
+		newCommentLike := models.CommentLike{
+			UserID:    user.ID,
+			CommentID: id,
+			Status:    -1,
+		}
+		if err := h.services.CreateDisLikeComment(newCommentLike); err != nil {
+			log.Printf("Post: CreateLikePost: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		Idpost := strconv.Itoa(id)
 		http.Redirect(w, r, "/get-post/"+Idpost, 302)
 	}
 }

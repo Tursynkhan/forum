@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"forum/internal/models"
 	"log"
 	"net/http"
@@ -74,10 +73,8 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
-		fmt.Println("Get Post: This is Id:", id)
 
 		post, err := h.services.Post.GetPost(id)
-		fmt.Println("Get Post: This is post:", post)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -90,10 +87,34 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+
+		likesPost, err := h.services.GetAllLikesByPostId(id)
+		if err != nil {
+			log.Println("Get Post: GetAllLikes : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		dislikesPost, err := h.services.GetAllDislikesByPostId(id)
+		if err != nil {
+			log.Println("Get Post: GetAllDisLikes : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		// likesComment,err:=h.services.GetAllDislikesByCommentId()
+
+		// dislikesComment,err:=h.services.GetAllLikesByCommentId()
+		newPostLike := models.PostLike{
+			Likes:    likesPost,
+			Dislikes: dislikesPost,
+		}
+
 		info := models.Info{
 			User:     user,
 			Post:     post,
 			Comments: comments,
+			PostLike: newPostLike,
 		}
 		ts, err := template.ParseFiles("./ui/templates/post.html")
 		if err != nil {
@@ -131,6 +152,29 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 			Status: 1,
 		}
 		if err := h.services.CreateLikePost(newPostLike); err != nil {
+			log.Printf("Post: CreateLikePost: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		Idpost := strconv.Itoa(id)
+		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+	}
+}
+
+func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		user, ok := r.Context().Value(key).(models.User)
+		if !ok {
+			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+			return
+		}
+		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-dislike/"))
+		newPostLike := models.PostLike{
+			UserID: user.ID,
+			PostID: id,
+			Status: -1,
+		}
+		if err := h.services.CreateDisLikePost(newPostLike); err != nil {
 			log.Printf("Post: CreateLikePost: %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return

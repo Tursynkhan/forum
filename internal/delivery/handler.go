@@ -23,8 +23,11 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("/create-post", h.userIdentity(h.createPost))
 	mux.HandleFunc("/get-post/", h.userIdentity(h.getPost))
 	mux.HandleFunc("/post-like/", h.userIdentity(h.postLike))
+	mux.HandleFunc("/post-dislike/", h.userIdentity(h.postDislike))
 
 	mux.HandleFunc("/create-comment", h.userIdentity(h.createComment))
+	mux.HandleFunc("/comment-like/", h.userIdentity(h.commentLike))
+	mux.HandleFunc("/comment-dislike/", h.userIdentity(h.commentDislike))
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
