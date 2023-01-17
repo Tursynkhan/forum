@@ -13,8 +13,11 @@ type VotePostLikeRepository struct {
 
 type VotePost interface {
 	CreateLikePost(postLike models.PostLike) error
+	CreateDisLikePost(postLike models.PostLike) error
 	GetStatusPostLike(postLike models.PostLike) (int, error)
 	UpdateStatusPostLike(status int, postLike models.PostLike) error
+	GetAllLikesByPostId(postId int) (int, error)
+	GetAllDislikesByPostId(postId int) (int, error)
 }
 
 func NewVotePostRepository(db *sql.DB) *VotePostLikeRepository {
@@ -50,4 +53,42 @@ func (r *VotePostLikeRepository) UpdateStatusPostLike(status int, postLike model
 		return fmt.Errorf("repository: updateStatus : %w", err)
 	}
 	return nil
+}
+
+func (r *VotePostLikeRepository) CreateDisLikePost(postLike models.PostLike) error {
+	_, err := r.db.Exec("INSERT INTO posts_like (UserId,PostId,Status) VALUES (?,?,?)", postLike.UserID, postLike.PostID, postLike.Status)
+	if err != nil {
+		return fmt.Errorf("CreateLikePost : create  likePost : %w", err)
+	}
+	return nil
+}
+
+func (r *VotePostLikeRepository) GetAllLikesByPostId(postId int) (int, error) {
+	row := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=1 AND PostId=?", postId)
+
+	count := 0
+	err := row.Scan(&count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else {
+			return 0, fmt.Errorf("GetAllLikesByPostId : %w", err)
+		}
+	}
+	return count, nil
+}
+
+func (r *VotePostLikeRepository) GetAllDislikesByPostId(postId int) (int, error) {
+	row := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=-1 AND PostId=?", postId)
+
+	count := 0
+	err := row.Scan(&count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else {
+			return 0, fmt.Errorf("GetAllLikesByPostId : %w", err)
+		}
+	}
+	return count, nil
 }
