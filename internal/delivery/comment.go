@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"forum/internal/models"
 	"log"
 	"net/http"
@@ -45,13 +46,20 @@ func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 			CommentID: id,
 			Status:    1,
 		}
-		if err := h.services.CreateLikeComment(newCommentLike); err != nil {
-			log.Printf("Post: CreateLikePost: %v\n", err)
+		comment, err := h.services.GetCommentById(id)
+		fmt.Println("commentLike: GetCommentById:", comment)
+		if err != nil {
+			log.Printf("Comment: CommentLike: %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+		if err := h.services.CreateLikeComment(newCommentLike); err != nil {
+			log.Printf("Comment: CommentLike: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/get-post/%d", comment.PostID), 302)
 	}
 }
 
@@ -68,12 +76,17 @@ func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
 			CommentID: id,
 			Status:    -1,
 		}
-		if err := h.services.CreateDisLikeComment(newCommentLike); err != nil {
-			log.Printf("Post: CreateLikePost: %v\n", err)
+		comment, err := h.services.GetCommentById(id)
+		if err != nil {
+			log.Printf("Comment: CommentLike: %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+		if err := h.services.CreateDisLikeComment(newCommentLike); err != nil {
+			log.Printf("Comment: CommentDislike: %v\n", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		http.Redirect(w, r, fmt.Sprintf("/get-post/%d", comment.PostID), 302)
 	}
 }
