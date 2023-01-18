@@ -47,7 +47,6 @@ func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 			Status:    1,
 		}
 		comment, err := h.services.GetCommentById(id)
-		fmt.Println("commentLike: GetCommentById:", comment)
 		if err != nil {
 			log.Printf("Comment: CommentLike: %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
