@@ -18,6 +18,8 @@ type VoteComment interface {
 	CreateDisLikeComment(comment models.CommentLike) error
 	GetAllLikesByCommentId(id int) (int, error)
 	GetAllDislikesByCommentId(id int) (int, error)
+	GetAllDislikesCommentByPostId(postId int) (int, error)
+	GetAllLikesCommentByPostId(postId int) (int, error)
 }
 
 func NewVoteCommentRepository(db *sql.DB) *VoteCommentRepository {
@@ -88,6 +90,34 @@ func (r *VoteCommentRepository) GetAllDislikesByCommentId(id int) (int, error) {
 			return 0, err
 		} else {
 			return 0, fmt.Errorf("GetAllLikesByCommentId : %w", err)
+		}
+	}
+	return count, nil
+}
+
+func (r *VoteCommentRepository) GetAllDislikesCommentByPostId(postId int) (int, error) {
+	row := r.db.QueryRow("SELECT COUNT(*) FROM comments_like JOIN comments ON comments_like.CommentId=comments.Id WHERE PostId=? AND Status=1", postId)
+	count := 0
+	err := row.Scan(&count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else {
+			return 0, fmt.Errorf("GetAllDislikesCommentByPostId: %w", err)
+		}
+	}
+	return count, nil
+}
+
+func (r *VoteCommentRepository) GetAllLikesCommentByPostId(postId int) (int, error) {
+	row := r.db.QueryRow("SELECT COUNT(*) FROM comments_like JOIN comments ON comments_like.CommentId=comments.Id WHERE PostId=? AND Status=-1", postId)
+	count := 0
+	err := row.Scan(&count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else {
+			return 0, fmt.Errorf("GetAllLikesCommentByPostId : %w", err)
 		}
 	}
 	return count, nil
