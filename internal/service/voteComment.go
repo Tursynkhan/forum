@@ -14,10 +14,8 @@ type VoteCommentService struct {
 type VoteComment interface {
 	CreateLikeComment(comment models.CommentLike) error
 	CreateDisLikeComment(comment models.CommentLike) error
-	GetAllLikesByCommentId(commentId int) (int, error)
-	GetAllDislikesByCommentId(commentId int) (int, error)
-	GetAllDislikesCommentByPostId(postId int) (int, error)
-	GetAllLikesCommentByPostId(postId int) (int, error)
+	GetCommentLikesByCommentID(id int) (int, error)
+	GetCommentDislikesByCommentID(id int) (int, error)
 }
 
 func NewVoteCommentService(repo repository.VoteComment) *VoteCommentService {
@@ -32,15 +30,11 @@ func (s *VoteCommentService) CreateLikeComment(comment models.CommentLike) error
 		}
 	}
 	if status == 1 {
-		if err := s.repo.UpdateStatusCommentLike(-1, comment); err != nil {
-			return err
-		}
-	} else if status == -1 {
 		if err := s.repo.UpdateStatusCommentLike(0, comment); err != nil {
 			return err
 		}
 	} else {
-		if err := s.repo.UpdateStatusCommentLike(-1, comment); err != nil {
+		if err := s.repo.UpdateStatusCommentLike(1, comment); err != nil {
 			return err
 		}
 	}
@@ -70,18 +64,10 @@ func (s *VoteCommentService) CreateDisLikeComment(comment models.CommentLike) er
 	return nil
 }
 
-func (s *VoteCommentService) GetAllLikesByCommentId(commentId int) (int, error) {
-	return s.repo.GetAllLikesByCommentId(commentId)
+func (s *VoteCommentService) GetCommentLikesByCommentID(id int) (int, error) {
+	return s.repo.GetCommentLikesByCommentID(id)
 }
 
-func (s *VoteCommentService) GetAllDislikesByCommentId(commentId int) (int, error) {
-	return s.repo.GetAllDislikesByCommentId(commentId)
-}
-
-func (s *VoteCommentService) GetAllLikesCommentByPostId(postId int) (int, error) {
-	return s.repo.GetAllLikesCommentByPostId(postId)
-}
-
-func (s *VoteCommentService) GetAllDislikesCommentByPostId(postId int) (int, error) {
-	return s.repo.GetAllDislikesCommentByPostId(postId)
+func (s *VoteCommentService) GetCommentDislikesByCommentID(id int) (int, error) {
+	return s.repo.GetCommentDislikesByCommentID(id)
 }
