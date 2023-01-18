@@ -88,6 +88,20 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		for i := 0; i < len(comments); i++ {
+			comments[i].Likes, err = h.services.GetCommentLikesByCommentID(comments[i].ID)
+			if err != nil {
+				log.Println("Get Post: GetCommentLikesByCommentID : ", err)
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+			comments[i].Dislikes, err = h.services.GetCommentDislikesByCommentID(comments[i].ID)
+			if err != nil {
+				log.Println("Get Post: GetCommentLikesByCommentID : ", err)
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+		}
 		likesPost, err := h.services.GetAllLikesByPostId(id)
 		if err != nil {
 			log.Println("Get Post: GetAllLikesByPostId : ", err)
@@ -102,32 +116,16 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		likesComment, err := h.services.GetAllDislikesCommentByPostId(id)
-		if err != nil {
-			log.Println("Get Post: GetAllDislikesCommentByPostId : ", err)
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
-		dislikesComment, err := h.services.GetAllLikesCommentByPostId(id)
-		if err != nil {
-			log.Println("Get Post: GetAllDislikesCommentByPostId : ", err)
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
 		newPostLike := models.PostLike{
 			Likes:    likesPost,
 			Dislikes: dislikesPost,
 		}
-		newCommentLike := models.CommentLike{
-			Likes:    likesComment,
-			Dislikes: dislikesComment,
-		}
+
 		info := models.Info{
-			User:        user,
-			Post:        post,
-			Comments:    comments,
-			PostLike:    newPostLike,
-			CommentLike: newCommentLike,
+			User:     user,
+			Post:     post,
+			Comments: comments,
+			PostLike: newPostLike,
 		}
 		ts, err := template.ParseFiles("./ui/templates/post.html")
 		if err != nil {
