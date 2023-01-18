@@ -53,8 +53,6 @@
         <h4>Comments</h4>
         <div class="comments">
             <div id="comments-list">
-                {{$cLike := .CommentLike.Likes}}
-                {{$cDislike := .CommentLike.Dislikes}}
                 {{range .Comments}}
                 <div class="comment-item">
                     <div class="content">
@@ -62,9 +60,9 @@
                     </div>
                     <div class="reaction">
                         <a href="/comment-like/{{.ID}}">Like</a>
-                        <span class="count-likes">{{$cLike}}</span>
+                        <span class="count-likes">{{.Likes}}</span>
                         <a href="/comment-dislike/{{.ID}}">Dislike</a>
-                        <span class="count-dislikes">{{$cDislike}}</span>
+                        <span class="count-dislikes">{{.Dislikes}}</span>
                     </div>
                 </div>
                 {{end}}
