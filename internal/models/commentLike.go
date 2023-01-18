@@ -5,7 +5,4 @@ type CommentLike struct {
 	UserID    int
 	CommentID int
 	Status    int
-
-	Likes    int
-	Dislikes int
 }
