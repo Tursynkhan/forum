@@ -51,9 +51,9 @@ func (r *CommentRepository) GetAllComments(postId int) ([]models.Comment, error)
 }
 
 func (r *CommentRepository) GetCommentById(id int) (models.Comment, error) {
-	row := r.db.QueryRow("SELECT Content,UserId,PostId FROM comments JOIN comments_like ON comments_like.CommentId=comments.Id WHERE Id=?", id)
+	row := r.db.QueryRow("SELECT Id,Content,UserId,PostId FROM comments  WHERE Id=?", id)
 	c := models.Comment{}
-	err := row.Scan(&c.Content, &c.PostID, &c.UserID)
+	err := row.Scan(&c.ID, &c.Content, &c.UserID, &c.PostID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.Comment{}, err
