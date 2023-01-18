@@ -8,6 +8,7 @@ import (
 type Comment interface {
 	CreateComment(comment models.Comment) error
 	GetAllComments(postId int) ([]models.Comment, error)
+	GetCommentById(id int) (models.Comment, error)
 }
 
 type CommentService struct {
@@ -24,4 +25,8 @@ func (s *CommentService) CreateComment(comment models.Comment) error {
 
 func (s *CommentService) GetAllComments(postId int) ([]models.Comment, error) {
 	return s.repo.GetAllComments(postId)
+}
+
+func (s *CommentService) GetCommentById(id int) (models.Comment, error) {
+	return s.repo.GetCommentById(id)
 }
