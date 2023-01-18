@@ -90,31 +90,44 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 
 		likesPost, err := h.services.GetAllLikesByPostId(id)
 		if err != nil {
-			log.Println("Get Post: GetAllLikes : ", err)
+			log.Println("Get Post: GetAllLikesByPostId : ", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
 		dislikesPost, err := h.services.GetAllDislikesByPostId(id)
 		if err != nil {
-			log.Println("Get Post: GetAllDisLikes : ", err)
+			log.Println("Get Post: GetAllDislikesByPostId : ", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		// likesComment,err:=h.services.GetAllDislikesByCommentId()
-
-		// dislikesComment,err:=h.services.GetAllLikesByCommentId()
+		likesComment, err := h.services.GetAllDislikesCommentByPostId(id)
+		if err != nil {
+			log.Println("Get Post: GetAllDislikesCommentByPostId : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		dislikesComment, err := h.services.GetAllLikesCommentByPostId(id)
+		if err != nil {
+			log.Println("Get Post: GetAllDislikesCommentByPostId : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		newPostLike := models.PostLike{
 			Likes:    likesPost,
 			Dislikes: dislikesPost,
 		}
-
+		newCommentLike := models.CommentLike{
+			Likes:    likesComment,
+			Dislikes: dislikesComment,
+		}
 		info := models.Info{
-			User:     user,
-			Post:     post,
-			Comments: comments,
-			PostLike: newPostLike,
+			User:        user,
+			Post:        post,
+			Comments:    comments,
+			PostLike:    newPostLike,
+			CommentLike: newCommentLike,
 		}
 		ts, err := template.ParseFiles("./ui/templates/post.html")
 		if err != nil {
