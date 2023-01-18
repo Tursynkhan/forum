@@ -16,6 +16,8 @@ type VoteComment interface {
 	CreateDisLikeComment(comment models.CommentLike) error
 	GetAllLikesByCommentId(commentId int) (int, error)
 	GetAllDislikesByCommentId(commentId int) (int, error)
+	GetAllDislikesCommentByPostId(postId int) (int, error)
+	GetAllLikesCommentByPostId(postId int) (int, error)
 }
 
 func NewVoteCommentService(repo repository.VoteComment) *VoteCommentService {
@@ -74,4 +76,12 @@ func (s *VoteCommentService) GetAllLikesByCommentId(commentId int) (int, error) 
 
 func (s *VoteCommentService) GetAllDislikesByCommentId(commentId int) (int, error) {
 	return s.repo.GetAllDislikesByCommentId(commentId)
+}
+
+func (s *VoteCommentService) GetAllLikesCommentByPostId(postId int) (int, error) {
+	return s.repo.GetAllLikesCommentByPostId(postId)
+}
+
+func (s *VoteCommentService) GetAllDislikesCommentByPostId(postId int) (int, error) {
+	return s.repo.GetAllDislikesCommentByPostId(postId)
 }
