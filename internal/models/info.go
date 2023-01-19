@@ -5,6 +5,7 @@ type Info struct {
 	Post        PostInfo
 	Posts       []PostInfo
 	Comments    []Comment
+	Category    []Category
 	PostLike    PostLike
 	CommentLike CommentLike
 }
