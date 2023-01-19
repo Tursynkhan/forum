@@ -31,12 +31,9 @@
             <div class="categories">
                 <form action="" method="post">
                     <select name="select">
-                        <option value="Getting Help">Getting Help</option>
-                        <option value="Releases">Releases</option>
-                        <option value="Technical Discussion">Technical Discussion</option>
-                        <option value="Community">Community</option>
-                        <option value="Jobs">Jobs</option>
-                        <option value="Site Feedback">Site Feedback</option>
+                        {{range .Category}}
+                        <option value="{{.Name}}">{{.Name}}</option>
+                        {{end}}
                     </select>
                 </form>
             </div>
