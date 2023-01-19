@@ -21,7 +21,16 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		err = ts.Execute(w, nil)
+		categories, err := h.services.GetAllCategories()
+		if err != nil {
+			log.Println("home page : get all categories", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		info := models.Info{
+			Category: categories,
+		}
+		err = ts.Execute(w, info)
 		if err != nil {
 			log.Println(err.Error())
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())

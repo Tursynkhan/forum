@@ -60,12 +60,9 @@
         
         <label for="categories">Categories</label><br>
         <select size="3" multiple id="categories "name="categories">
-          <option value="1">Getting Help</option>
-          <option value="2">Releases</option>
-          <option value="3">Technical Discussion</option>
-          <option value="4">Community</option>
-          <option value="5">Jobs</option>
-          <option value="6">Site Feedback</option>
+          {{range .Category}}
+          <option value="{{.ID}}">{{.Name}}</option>
+          {{end}}
         </select><br>
         <button type="submit">Create</button> 
     </form>
