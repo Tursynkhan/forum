@@ -1,11 +1,10 @@
 package delivery
 
 import (
+	"forum/internal/models"
 	"log"
 	"net/http"
 	"text/template"
-
-	"forum/internal/models"
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
@@ -28,9 +27,15 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-
+		categories, err := h.services.GetAllCategories()
+		if err != nil {
+			log.Println("home page : get all categories", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		info := models.Info{
-			Posts: posts,
+			Posts:    posts,
+			Category: categories,
 		}
 		ts, err := template.ParseFiles("./ui/templates/index.html")
 		if err = ts.Execute(w, info); err != nil {
@@ -46,9 +51,16 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
+	categories, err := h.services.GetAllCategories()
+	if err != nil {
+		log.Println("home page : get all categories", err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 	info := models.Info{
-		Posts: posts,
-		User:  user,
+		Posts:    posts,
+		User:     user,
+		Category: categories,
 	}
 	ts, err := template.ParseFiles("./ui/templates/index.html")
 	if err != nil {
