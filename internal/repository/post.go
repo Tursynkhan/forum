@@ -4,18 +4,19 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-
 	"forum/internal/models"
 )
 
 type PostRepository struct {
 	db *sql.DB
 }
+
 type Post interface {
 	CreatePost(post models.Post) (int, error)
 	GetAllPosts() ([]models.PostInfo, error)
 	GetPost(id int) (models.PostInfo, error)
 	CreatePostCategory(postId int, categories []string) error
+	GetAllCategories() ([]models.Category, error)
 }
 
 func NewPostRepository(db *sql.DB) *PostRepository {
@@ -90,4 +91,23 @@ func (r *PostRepository) GetPost(id int) (models.PostInfo, error) {
 		}
 	}
 	return post, nil
+}
+
+func (r *PostRepository) GetAllCategories() ([]models.Category, error) {
+	rows, err := r.db.Query("SELECT Id,Name FROM categories")
+	if err != nil {
+		return []models.Category{}, fmt.Errorf("repository : GetAllCategories: %w", err)
+	}
+	var categories []models.Category
+	for rows.Next() {
+		var c models.Category
+		err := rows.Scan(&c.ID, &c.Name)
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.Category{}, err
+		} else if err != nil {
+			return []models.Category{}, err
+		}
+		categories = append(categories, c)
+	}
+	return categories, nil
 }

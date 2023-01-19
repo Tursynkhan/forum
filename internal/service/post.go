@@ -10,6 +10,7 @@ type Post interface {
 	GetAllPosts() ([]models.PostInfo, error)
 	GetPost(id int) (models.PostInfo, error)
 	CreatePostCategory(id int, categories []string) error
+	GetAllCategories() ([]models.Category, error)
 }
 
 type PostService struct {
@@ -34,4 +35,8 @@ func (s *PostService) GetPost(id int) (models.PostInfo, error) {
 
 func (s *PostService) CreatePostCategory(id int, categories []string) error {
 	return s.repo.CreatePostCategory(id, categories)
+}
+
+func (s *PostService) GetAllCategories() ([]models.Category, error) {
+	return s.repo.GetAllCategories()
 }
