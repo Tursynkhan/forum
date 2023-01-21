@@ -29,24 +29,32 @@
     <main class="container-main">
         <div class="nav-bar">
             <div class="categories">
-                <form action="" method="post">
+                <form id="form"  action="/?tag=" method="GET">
                     <select name="select">
                         {{range .Category}}
-                        <option value="{{.Name}}">{{.Name}}</option>
+                        <option onclick="submit()" value="{{.Name}}">{{.Name}}</option>
                         {{end}}
                     </select>
                 </form>
+                <script>
+                    function submit() {
+                        let form = document.getElementById("form");
+                        form.submit();
+                        alert("Data stored in database!");
+                    }
+                </script>
             </div>
             <div class="right-navbar">
+                {{if .User.Username}}
                 <div class="filters">
                     <div class="created-post">
-                        <a href="">Created post</a>
+                        <a href="/?time=new">Created post</a>
                     </div>
                     <div class="liked-post">
-                        <a href="">Liked post</a>
+                        <a href="/?like=most">Most liked</a>
+                        <a href="/?like=least">Least liked</a>
                     </div>
                 </div>
-                {{if .User.Username}}
                 <div class="create-post">
                     <a href="/create-post">New Post</a>
                 </div>
