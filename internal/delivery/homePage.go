@@ -33,6 +33,21 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+		if len(r.URL.Query()) == 0 {
+			posts, err = h.services.GetAllPosts()
+			if err != nil {
+				log.Println("home page : get all posts : ", err)
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+		} else {
+			posts, err = h.services.GetPostByFilter(r.URL.Query())
+			if err != nil {
+				log.Println("home page : GetPostByFilter : ", err)
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+		}
 		info := models.Info{
 			Posts:    posts,
 			Category: categories,
@@ -45,17 +60,27 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	posts, err = h.services.GetAllPosts()
+
+	categories, err := h.services.GetAllCategories()
 	if err != nil {
-		log.Println("home page : get all posts", err)
+		log.Println("home page : get all categories :", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	categories, err := h.services.GetAllCategories()
-	if err != nil {
-		log.Println("home page : get all categories", err)
-		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
+	if len(r.URL.Query()) == 0 {
+		posts, err = h.services.GetAllPosts()
+		if err != nil {
+			log.Println("home page : get all posts : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	} else {
+		posts, err = h.services.GetPostByFilter(r.URL.Query())
+		if err != nil {
+			log.Println("home page : GetPostByFilter : ", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 	}
 	info := models.Info{
 		Posts:    posts,
