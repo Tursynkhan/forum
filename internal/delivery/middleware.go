@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"forum/internal/models"
 	"log"
 	"net/http"
 	"time"
-
-	"forum/internal/models"
 )
 
 type contextKey string
@@ -41,7 +40,7 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 				return
 			}
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "values", models.User{})))
+			next.ServeHTTP(w, r)
 			return
 		}
 		ctx := context.WithValue(r.Context(), key, user)

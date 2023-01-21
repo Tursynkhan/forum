@@ -1,12 +1,11 @@
 package delivery
 
 import (
+	"forum/internal/models"
 	"log"
 	"net/http"
 	"text/template"
 	"time"
-
-	"forum/internal/models"
 )
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
@@ -91,12 +90,13 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/auth/logout" {
-		log.Println("Sign In : Wrong URL Path")
-		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-		return
-	}
+	// if r.URL.Path != "/auth/logout" {
+	// 	log.Println("Sign In : Wrong URL Path")
+	// 	h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+	// 	return
+	// }
 	if r.Method == "GET" {
+		var err error
 		token, err := r.Cookie("session_token")
 		if err != nil {
 			if err == http.ErrNoCookie {
@@ -104,7 +104,8 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		if err := h.services.DeleteToken(token.Value); err != nil {
+		err = h.services.DeleteToken(token.Value)
+		if err != nil {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
