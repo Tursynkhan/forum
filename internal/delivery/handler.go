@@ -13,7 +13,7 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-func (h *Handler) InitRoutes() *http.ServeMux {
+func (h *Handler) InitRoutes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", h.userIdentity(h.home))
 	mux.HandleFunc("/auth/signup", h.signUp)
@@ -32,5 +32,5 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	return mux
+	return h.recoverPanic(h.logRequest(h.secureHeaders(mux)))
 }
