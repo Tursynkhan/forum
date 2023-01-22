@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"forum/internal/forms"
 	"forum/internal/models"
 	"log"
 	"net/http"
@@ -29,11 +30,40 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == "POST" {
 
+		if err := r.ParseForm(); err != nil {
+			h.errorHandler(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			return
+		}
 		name := r.FormValue("name")
 		email := r.FormValue("email")
 		psw := r.FormValue("psw")
 		pswRepeat := r.FormValue("psw-repeat")
 
+		form := forms.New(r.PostForm)
+		form.Required("name", "email", "password")
+		form.MatchesPattern("email", forms.EmailRX)
+		form.Minlength("psw", 10)
+
+		if !form.Valid() {
+			ts, err := template.ParseFiles("./ui/templates/signUp.html")
+			if err != nil {
+				log.Printf("Sign Up: Execute:%v", err)
+				h.errorHandler(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+			type NewForm struct {
+				Form *forms.Form
+			}
+			Form := NewForm{
+				Form: form,
+			}
+			err = ts.Execute(w, Form)
+			if err != nil {
+				log.Println(err.Error())
+				h.errorHandler(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+		}
 		newUser := models.User{
 			Username:       name,
 			Email:          email,
