@@ -47,3 +47,41 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
+
+func (h *Handler) secureHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-XXS-Protection", "1;mode=block")
+		w.Header().Set("X-Frame-Options", "deny")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// func (h *Handler) myMiddleware(next http.HandlerFunc) http.HandlerFunc {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		if !isAuthorized(r) {
+// 			h.errorHandler(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+// 			return
+// 		}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
+func (h *Handler) logRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (h *Handler) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				w.Header().Set("Connection", "close")
+				log.Printf("middleware : recoverPanic: ", err)
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
