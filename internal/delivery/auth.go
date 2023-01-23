@@ -1,37 +1,44 @@
 package delivery
 
 import (
+	"errors"
 	"forum/internal/forms"
 	"forum/internal/models"
+	"forum/internal/service"
 	"log"
 	"net/http"
-	"text/template"
 	"time"
 )
 
+type NewForm struct {
+	Form forms.Form
+}
+
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
+	// user, ok := h.ctx.Context().Value(key).(models.User)
+	// if !ok {
+	// 	h.errorHandler(w, http.StatusBadRequest, "You already in")
+	// 	return
+	// }
 	if r.URL.Path != "/auth/signup" {
 		log.Println("Sign Up:Wrong URL Path")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./ui/templates/signUp.html")
-		if err != nil {
-			log.Printf("Sign Up: Execute:%v", err)
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
-			return
+		Form := NewForm{
+			Form: *forms.New(nil),
 		}
-		err = ts.Execute(w, nil)
-		if err != nil {
+		if err := h.tmpl.ExecuteTemplate(w, "signUp.html", Form); err != nil {
 			log.Println(err.Error())
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else if r.Method == "POST" {
 
-		if err := r.ParseForm(); err != nil {
-			h.errorHandler(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		err := r.ParseForm()
+		if err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		name := r.FormValue("name")
@@ -39,31 +46,6 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		psw := r.FormValue("psw")
 		pswRepeat := r.FormValue("psw-repeat")
 
-		form := forms.New(r.PostForm)
-		form.Required("name", "email", "password")
-		form.MatchesPattern("email", forms.EmailRX)
-		form.Minlength("psw", 10)
-
-		if !form.Valid() {
-			ts, err := template.ParseFiles("./ui/templates/signUp.html")
-			if err != nil {
-				log.Printf("Sign Up: Execute:%v", err)
-				h.errorHandler(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			type NewForm struct {
-				Form *forms.Form
-			}
-			Form := NewForm{
-				Form: form,
-			}
-			err = ts.Execute(w, Form)
-			if err != nil {
-				log.Println(err.Error())
-				h.errorHandler(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-		}
 		newUser := models.User{
 			Username:       name,
 			Email:          email,
@@ -71,11 +53,40 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			RepeatPassword: pswRepeat,
 		}
 		if err := h.services.Autorization.CreateUser(newUser); err != nil {
+			form := forms.New(r.PostForm)
+			form.Required("name", "email", "psw")
 			log.Printf("Sign Up: Create User: %v", err)
-			h.errorHandler(w, http.StatusForbidden, err.Error())
-			return
+			if errors.Is(err, service.ErrInvalidEmail) {
+				form.ErrorField("email")
+			} else if errors.Is(err, service.ErrInvalidPassword) {
+				form.ErrorMatchesPattern("psw")
+			} else if errors.Is(err, service.ErrInvalidUsername) {
+				form.ErrorField("name")
+			} else if errors.Is(err, service.ErrUserExist) {
+				form.IsExist("name", "User exist")
+			} else if errors.Is(err, service.ErrUserNotFound) {
+				form.IsExist("name", "User Not Found")
+			} else if errors.Is(err, service.ErrPasswdNotMatch) {
+				form.IsExist("psw", "Password doesn't match")
+			} else if errors.Is(err, service.ErrEmailExist) {
+				form.IsExist("email", "Email exist")
+			} else {
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+			if !form.Valid() {
+				Form := NewForm{
+					Form: *form,
+				}
+				if err := h.tmpl.ExecuteTemplate(w, "signUp.html", Form); err != nil {
+					log.Println(err.Error())
+					h.errorHandler(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+				return
+			}
 		}
-		http.Redirect(w, r, "/auth/signin", 301)
+		http.Redirect(w, r, "/auth/signin", http.StatusSeeOther)
 	} else {
 		log.Println("Sign Up: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
@@ -90,22 +101,39 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == "GET" {
-		ts, err := template.ParseFiles("./ui/templates/signIn.html")
-		if err != nil {
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
-			return
+		Form := NewForm{
+			Form: *forms.New(nil),
 		}
-		if err = ts.Execute(w, nil); err != nil {
-			log.Printf("Sign In: Execute:%v", err)
+		if err := h.tmpl.ExecuteTemplate(w, "signIn.html", Form); err != nil {
+			log.Println(err.Error())
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 		name := r.FormValue("name")
 		psw := r.FormValue("psw")
+
+		form := forms.New(r.PostForm)
 		sessionToken, expiresTime, err := h.services.GenerateToken(name, psw)
 		if err != nil {
 			log.Printf("Sign In: Generate Token:%v", err)
+			if errors.Is(err, service.ErrUserNotFound) {
+				form.Errors.Add("generic", "Username or Password is incorrect")
+				Form := NewForm{
+					Form: *form,
+				}
+				if err := h.tmpl.ExecuteTemplate(w, "signIn.html", Form); err != nil {
+					log.Println(err.Error())
+					h.errorHandler(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+				return
+			}
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -115,7 +143,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			Expires: expiresTime,
 			Path:    "/",
 		})
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
@@ -125,7 +153,7 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	// 	h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 	// 	return
 	// }
-	if r.Method == "GET" {
+	if r.Method == "POST" {
 		var err error
 		token, err := r.Cookie("session_token")
 		if err != nil {
@@ -144,7 +172,7 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 			Value:   "",
 			Expires: time.Now(),
 		})
-		http.Redirect(w, r, "/", 301)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		log.Println("Logout : Method Not Allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
