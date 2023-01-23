@@ -20,17 +20,22 @@ const (
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			Username TEXT UNIQUE,
 			Email TEXT UNIQUE,
-			Password TEXT,
-			Token TEXT DEFAULT NULL,
-			ExpireTime DATETIME DEFAULT NULL 
-		);`
+			Password TEXT
+			);`
+	sessionTable = `CREATE TABLE IF NOT EXISTS session(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
+			Token TEXT,
+			ExpireTime DATETIME,
+			UserId INTEGER,
+			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE
+			);`
 	postTable = `CREATE TABLE IF NOT EXISTS posts(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			Title TEXT NOT NULL,
 			Content TEXT,
 			UserId INTEGER,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE
-		);`
+			);`
 	categoryTable = `CREATE TABLE IF NOT EXISTS categories(
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			Name TEXT UNIQUE
@@ -89,7 +94,7 @@ func InitDB(cfg Config) (*sql.DB, error) {
 }
 
 func CreateTables(db *sql.DB) error {
-	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable, insertCategories}
+	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable, insertCategories, sessionTable}
 	for _, table := range allTables {
 		_, err := db.Exec(table)
 		if err != nil {
