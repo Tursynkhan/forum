@@ -1,12 +1,15 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
 	"net/mail"
+	"regexp"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -18,6 +21,8 @@ var (
 	ErrInvalidPassword = errors.New("Invalid password")
 	ErrUserNotFound    = errors.New("User not found")
 	ErrUserExist       = errors.New("User exist")
+	ErrEmailExist      = errors.New("Email exist")
+	ErrPasswdNotMatch  = errors.New("Password doesn't match")
 )
 
 type Autorization interface {
@@ -38,10 +43,21 @@ func NewAuthService(repo repository.Autorization) *AuthService {
 func (s *AuthService) CreateUser(user models.User) error {
 	userCheck, err := s.repo.GetUser(user.Username)
 	if err != nil {
-		return err
+		if !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("service: create user: %w", err)
+		}
+	}
+	emailCheck, err := s.repo.GetEmail(user.Email)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("service: create user: %w", err)
+		}
 	}
 	if userCheck.Username == user.Username {
 		return ErrUserExist
+	}
+	if emailCheck.Email == user.Email {
+		return ErrEmailExist
 	}
 	if err := checkUser(user); err != nil {
 		return err
@@ -55,6 +71,9 @@ func (s *AuthService) CreateUser(user models.User) error {
 func (s *AuthService) GenerateToken(username, password string) (string, time.Time, error) {
 	user, err := s.repo.GetUser(username)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", time.Time{}, ErrUserNotFound
+		}
 		return "", time.Time{}, err
 	}
 	if user.Username == "" {
@@ -67,7 +86,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(120 * time.Second)
 
-	if err := s.repo.SaveToken(user.Username, sessionToken, expiresAt); err != nil {
+	if err := s.repo.SaveToken(user, sessionToken, expiresAt); err != nil {
 		return "", time.Time{}, err
 	}
 	return sessionToken, expiresAt, nil
@@ -76,7 +95,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 func (s *AuthService) ParseToken(token string) (models.User, error) {
 	user, err := s.repo.GetUserByToken(token)
 	if err != nil {
-		return models.User{}, err
+		return models.User{}, fmt.Errorf("service : ParseToken %w", err)
 	}
 	return user, nil
 }
@@ -89,7 +108,7 @@ func generatePasswordHash(password string) (string, error) {
 	pwd := []byte(password)
 	hash, err := bcrypt.GenerateFromPassword(pwd, 14)
 	if err != nil {
-		return "", fmt.Errorf("service: generatePassword: %v", err)
+		return "", fmt.Errorf("service : generatePassword : %v", err)
 	}
 	return string(hash), nil
 }
@@ -101,17 +120,50 @@ func checkHash(hpass, password string) error {
 func checkUser(user models.User) error {
 	for _, letter := range user.Username {
 		if letter < 32 || letter > 126 {
-			return fmt.Errorf("service: CreateUser: checkUser: %v", ErrInvalidUsername)
+			return fmt.Errorf("service: CreateUser: checkUser : %w", ErrInvalidUsername)
 		}
 	}
+	validEmail, err := regexp.MatchString(`[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`, user.Email)
+	if err != nil {
+		return err
+	}
+	if !validEmail {
+		return ErrInvalidEmail
+	}
 	if _, err := mail.ParseAddress(user.Email); err != nil {
-		return fmt.Errorf("service: CreateUser: checkUser: %v", ErrInvalidEmail)
+		return fmt.Errorf("service: CreateUser: checkUser : %w", ErrInvalidEmail)
 	}
 	if len(user.Username) < 2 || len(user.Username) > 36 {
-		return fmt.Errorf("service: CreateUser: checkUser: %v", ErrInvalidUsername)
+		return fmt.Errorf("service: CreateUser: checkUser : %w", ErrInvalidUsername)
+	}
+
+	if !isValidPassword(user.Password) {
+		return fmt.Errorf("service : CreateUser : checUser : %w", ErrInvalidPassword)
 	}
 	if user.Password != user.RepeatPassword {
-		return fmt.Errorf("service: CreateUser: checUser: %v", errors.New("Password doesn't match"))
+		return fmt.Errorf("service : CreateUser : checUser : %w", ErrPasswdNotMatch)
 	}
 	return nil
+}
+
+func isValidPassword(password string) bool {
+	if len(password) < 8 {
+		return false
+	}
+	var hasUpper bool
+	var hasLower bool
+	var hasDigit bool
+	var hasSpecial bool
+	for _, char := range password {
+		if unicode.IsUpper(char) {
+			hasUpper = true
+		} else if unicode.IsLower(char) {
+			hasLower = true
+		} else if unicode.IsDigit(char) {
+			hasDigit = true
+		} else if !unicode.IsLetter(char) && !unicode.IsDigit(char) {
+			hasSpecial = true
+		}
+	}
+	return hasUpper && hasLower && hasDigit && hasSpecial
 }
