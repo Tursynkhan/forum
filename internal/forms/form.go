@@ -29,6 +29,14 @@ func (f *Form) Required(fields ...string) {
 	}
 }
 
+func (f *Form) UserNameValid(field string) {
+	value := f.Get(field)
+
+	if utf8.RuneCountInString(value) < 8 {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d character)", 8))
+	}
+}
+
 func (f *Form) MaxLength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
@@ -58,6 +66,8 @@ func (f *Form) Valid() bool {
 
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
+var UsernameRX = regexp.MustCompile(`[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
+
 func (f *Form) Minlength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
@@ -76,4 +86,25 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 	if !pattern.MatchString(value) {
 		f.Errors.Add(field, "This field is invalid")
 	}
+}
+
+func (f *Form) ErrorField(field string) {
+	// value := f.Get(field)
+	// if value == "" {
+	// 	return
+	// }
+	f.Errors.Add(field, "This field is invalid")
+}
+
+func (f *Form) ErrorMatchesPattern(field string) {
+	str := `Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:`
+	f.Errors.Add(field, str)
+}
+
+func (f *Form) IsExist(field string, str string) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	f.Errors.Add(field, str)
 }
