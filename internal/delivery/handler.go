@@ -3,14 +3,19 @@ package delivery
 import (
 	"forum/internal/service"
 	"net/http"
+	"text/template"
 )
 
 type Handler struct {
+	tmpl     *template.Template
 	services *service.Service
 }
 
 func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+	return &Handler{
+		tmpl:     template.Must(template.ParseGlob("./ui/templates/*.html")),
+		services: services,
+	}
 }
 
 func (h *Handler) InitRoutes() http.Handler {
@@ -32,5 +37,5 @@ func (h *Handler) InitRoutes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	return h.recoverPanic(h.logRequest(h.secureHeaders(mux)))
+	return h.logRequest(h.secureHeaders(mux))
 }
