@@ -35,6 +35,7 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		fmt.Println("middleware : ParseToken : user :")
 		if user.Expiretime.Before(time.Now()) {
 			if err := h.services.DeleteToken(token.Value); err != nil {
 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -72,16 +73,16 @@ func (h *Handler) logRequest(next http.Handler) http.Handler {
 	})
 }
 
-func (h *Handler) recoverPanic(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				w.Header().Set("Connection", "close")
-				log.Printf("middleware : recoverPanic: ", err)
-				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+// func (h *Handler) recoverPanic(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		defer func() {
+// 			if err := recover(); err != nil {
+// 				w.Header().Set("Connection", "close")
+// 				log.Printf("middleware : recoverPanic: ", err)
+// 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 
-			}
-		}()
-		next.ServeHTTP(w, r)
-	})
-}
+// 			}
+// 		}()
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
