@@ -10,13 +10,18 @@
 <body>
     <form action="/auth/signin" method="post">
         <div class="container">
+          {{with .Form}}
+            {{with .Errors.Get "generic"}}
+            <div class="error" style="color:white;padding: 10px;border: 1px solid red;background-color: red;">{{.}}</div>
+            {{end}}
           <label for="name"><b>Username</b></label>
-          <input type="text" placeholder="Enter Username" name="name" required>
+          <input type="text" placeholder="Enter Username" name="name" value='{{.Get "name"}}' required>
       
           <label for="psw"><b>Password</b></label>
           <input type="password" placeholder="Enter Password" name="psw" required>
       
           <button type="submit">Login</button>
+          {{end}}
         </div>
       
         <div class="container" style="background-color:#f1f1f1">

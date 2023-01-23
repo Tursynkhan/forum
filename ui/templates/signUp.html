@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../static/css/signUp.css">
 </head>
 <body>
+
     <form action="/auth/signup" style="border:1px solid #ccc" method="POST">
         <div class="container">
           <h1>Sign Up</h1>
@@ -16,32 +17,31 @@
           {{with .Form}}
           <label for="name"><b>Username</b></label>
             {{with .Errors.Get "name"}}
-            <label class="error">{{.}}</label>
+            <label class="error" style="color: red;">{{.}}</label>
             {{end}}
-          <input type="text" placeholder="Enter Username" name="name" value='{{.Get "name"}}' required>
-
+          <input type="text" placeholder="Enter Username" name="name" value='{{ .Get "name"}}' required>
           <label for="email"><b>Email</b></label>
             {{with .Errors.Get "email"}}
-            <label for="error">{{.}}</label>
+            <label for="error" style="color: red;">{{.}}</label>
             {{end}}
-          <input type="text" placeholder="Enter Email" name="email" value ='{{.Get "name"}}' required>
+          <input type="text" placeholder="Enter Email" name="email" value ='{{.Get "email"}}' required>
       
           <label for="psw"><b>Password</b></label>
 
             {{with .Errors.Get "psw"}}
-            <label class="error">{{.}}</label>
+            <label class="error" style="color: red;">{{.}}</label>
             {{end}}
-          <input type="password" placeholder="Enter Password" name="psw" required>
-      
+          <input type="password" placeholder="Enter Password" name="psw" value='{{.Get "psw"}}' required>
+          
           <label for="psw-repeat"><b>Repeat Password</b></label>
           <input type="password" placeholder="Repeat Password" name="psw-repeat" required>
           {{end}}
-          
           <div class="clearfix">
             <button type="button" class="cancelbtn">Cancel</button>
             <button type="submit" class="signupbtn">Sign Up</button>
           </div>
         </div>
-      </form> 
+      </form>
+  
 </body>
 </html>

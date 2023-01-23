@@ -14,7 +14,10 @@
             {{if .User.Username}}
                 <div class="username">{{.User.Username}}</div>
                 <div class="log-out">
-                    <a href="/auth/logout">Log out</a>
+                    <form action="/auth/logout" method="POST">
+                        <input type="hidden" name="token" value="{{.User.Token}}">
+                        <button>Logout</button>
+                    </form>
                 </div>
             {{else}}
             <div class="sign-up">
