@@ -1,13 +1,14 @@
 package delivery
 
 import (
+	"fmt"
 	"forum/internal/models"
 	"log"
 	"net/http"
-	"text/template"
 )
 
 func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("I am in home")
 	var posts []models.PostInfo
 	var err error
 	if r.URL.Path != "/" {
@@ -21,12 +22,8 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, ok := r.Context().Value(key).(models.User)
+	fmt.Println("home:", user)
 	if !ok {
-		posts, err = h.services.GetAllPosts()
-		if err != nil {
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
 		categories, err := h.services.GetAllCategories()
 		if err != nil {
 			log.Println("home page : get all categories", err)
@@ -52,11 +49,9 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			Posts:    posts,
 			Category: categories,
 		}
-		ts, err := template.ParseFiles("./ui/templates/index.html")
-		if err = ts.Execute(w, info); err != nil {
-			log.Printf("homepage : execute : %v", err)
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
+		if err := h.tmpl.ExecuteTemplate(w, "index.html", info); err != nil {
+			log.Println(err.Error())
+			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
@@ -87,15 +82,8 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 		User:     user,
 		Category: categories,
 	}
-	ts, err := template.ParseFiles("./ui/templates/index.html")
-	if err != nil {
+	if err := h.tmpl.ExecuteTemplate(w, "index.html", info); err != nil {
 		log.Println(err.Error())
-		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
-	}
-	if err = ts.Execute(w, info); err != nil {
-		log.Println("home page : execute error :", err)
-		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
 	}
 }

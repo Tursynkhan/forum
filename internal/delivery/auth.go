@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/forms"
 	"forum/internal/models"
 	"forum/internal/service"
@@ -119,7 +120,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		psw := r.FormValue("psw")
 
 		form := forms.New(r.PostForm)
-		sessionToken, expiresTime, err := h.services.GenerateToken(name, psw)
+		sessionToken, expireTime, err := h.services.GenerateToken(name, psw)
 		if err != nil {
 			log.Printf("Sign In: Generate Token:%v", err)
 			if errors.Is(err, service.ErrUserNotFound) {
@@ -140,7 +141,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{
 			Name:    "session_token",
 			Value:   sessionToken,
-			Expires: expiresTime,
+			Expires: expireTime,
 			Path:    "/",
 		})
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -148,11 +149,11 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
-	// if r.URL.Path != "/auth/logout" {
-	// 	log.Println("Sign In : Wrong URL Path")
-	// 	h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-	// 	return
-	// }
+	if r.URL.Path != "/auth/logout" {
+		log.Println("Sign In : Wrong URL Path")
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
 	if r.Method == "POST" {
 		var err error
 		token, err := r.Cookie("session_token")
@@ -167,11 +168,15 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		http.SetCookie(w, &http.Cookie{
+		c := &http.Cookie{
 			Name:    "session_token",
 			Value:   "",
-			Expires: time.Now(),
-		})
+			Path:    "/",
+			Expires: time.Unix(0, 0),
+		}
+		http.SetCookie(w, c)
+
+		fmt.Println("after setcookie logout")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		log.Println("Logout : Method Not Allowed")

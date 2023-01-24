@@ -73,9 +73,9 @@ func (r *AuthSql) SaveToken(user models.User, sessionToken string, time time.Tim
 }
 
 func (r *AuthSql) GetUserByToken(token string) (models.User, error) {
-	row := r.db.QueryRow("SELECT users.Id,users.Username,users.Password,users.Email FROM users JOIN session ON users.Id=session.UserId WHERE session.Token=?", token)
+	row := r.db.QueryRow("SELECT users.Id,users.Username,users.Email,session.ExpireTime FROM users JOIN session ON users.Id=session.UserId WHERE session.Token=?", token)
 	var user models.User
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Expiretime)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.User{}, fmt.Errorf("repository : GetUserByToken : %w", err)
@@ -87,7 +87,7 @@ func (r *AuthSql) GetUserByToken(token string) (models.User, error) {
 }
 
 func (r *AuthSql) DeleteToken(token string) error {
-	_, err := r.db.Exec("UPDATE users set Token = NULL WHERE Token=$1", token)
+	_, err := r.db.Exec("DELETE FROM session WHERE Token=?", token)
 	if err != nil {
 		return fmt.Errorf("repository : delete token : %w", err)
 	}

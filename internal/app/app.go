@@ -1,12 +1,11 @@
 package app
 
 import (
-	"log"
-
 	"forum/internal/delivery"
 	"forum/internal/repository"
 	"forum/internal/server"
 	"forum/internal/service"
+	"log"
 )
 
 func Run() {
