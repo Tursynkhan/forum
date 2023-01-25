@@ -30,6 +30,7 @@ type Autorization interface {
 	GenerateToken(username, password string) (string, time.Time, error)
 	ParseToken(token string) (models.User, error)
 	DeleteToken(token string) error
+	DeleteTokenWhenExpireTime() error
 }
 
 type AuthService struct {
@@ -84,7 +85,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 	}
 
 	sessionToken := uuid.NewString()
-	expiresAt := time.Now().Add(30 * time.Second)
+	expiresAt := time.Now().Add(60 * time.Second)
 
 	if err := s.repo.SaveToken(user, sessionToken, expiresAt); err != nil {
 		return "", time.Time{}, err
@@ -102,6 +103,10 @@ func (s *AuthService) ParseToken(token string) (models.User, error) {
 
 func (s *AuthService) DeleteToken(token string) error {
 	return s.repo.DeleteToken(token)
+}
+
+func (s *AuthService) DeleteTokenWhenExpireTime() error {
+	return s.repo.DeleteTokenWhenExpireTime()
 }
 
 func generatePasswordHash(password string) (string, error) {

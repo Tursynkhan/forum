@@ -33,6 +33,7 @@ const (
 			Id INTEGER PRIMARY KEY AUTOINCREMENT,
 			Title TEXT NOT NULL,
 			Content TEXT,
+			Created TEXT,
 			UserId INTEGER,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE
 			);`

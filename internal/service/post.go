@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"forum/internal/models"
 	"forum/internal/repository"
+	"strings"
 )
 
 type Post interface {
@@ -22,7 +24,19 @@ func NewPostService(repo repository.Post) *PostService {
 	return &PostService{repo: repo}
 }
 
+var (
+	ErrInvalidPost    = errors.New("invalid post")
+	ErrPostTitleLen   = errors.New("title length out of range")
+	ErrPostContentLen = errors.New("content length out of range")
+)
+
 func (s *PostService) CreatePost(post models.Post) (int, error) {
+	if isInvalidPost(post) {
+		return 0, ErrInvalidPost
+	}
+	if err := checkPost(post); err != nil {
+		return 0, err
+	}
 	return s.repo.CreatePost(post)
 }
 
@@ -63,7 +77,15 @@ func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostI
 		} else if key == "time" {
 			for _, w := range val {
 				if w == "new" {
+					posts, err = s.repo.GetPostsByNewest()
+					if err != nil {
+						return []models.PostInfo{}, nil
+					}
 				} else if w == "old" {
+					posts, err = s.repo.GetPostsByOldest()
+					if err != nil {
+						return []models.PostInfo{}, nil
+					}
 				}
 			}
 		} else if key == "select" {
@@ -76,4 +98,25 @@ func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostI
 		}
 	}
 	return posts, nil
+}
+
+func checkPost(post models.Post) error {
+	if len(post.Title) > 100 {
+		return ErrPostTitleLen
+	}
+
+	if len(post.Content) > 1500 {
+		return ErrPostContentLen
+	}
+	return nil
+}
+
+func isInvalidPost(post models.Post) bool {
+	if strings.ReplaceAll(post.Title, " ", "") == "" {
+		return true
+	}
+	if strings.ReplaceAll(post.Content, " ", "") == "" {
+		return true
+	}
+	return false
 }
