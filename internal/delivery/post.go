@@ -1,19 +1,34 @@
 package delivery
 
 import (
+	"database/sql"
+	"errors"
+	"forum/internal/forms"
 	"forum/internal/models"
+	"forum/internal/service"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
+	"time"
 )
 
+type NewForms struct {
+	Form     forms.Form
+	Category []models.Category
+}
+
 func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
 	if r.URL.Path != "/create-post" {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
+
 	if r.Method == "GET" {
 
 		categories, err := h.services.GetAllCategories()
@@ -22,20 +37,17 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		info := models.Info{
+
+		Form := NewForms{
+			Form:     *forms.New(nil),
 			Category: categories,
 		}
-		if err := h.tmpl.ExecuteTemplate(w, "createPost.html", info); err != nil {
+		if err := h.tmpl.ExecuteTemplate(w, "createPost.html", Form); err != nil {
 			log.Println(err.Error())
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 	} else if r.Method == "POST" {
-		user, ok := r.Context().Value(key).(models.User)
-		if !ok {
-			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
-			return
-		}
 		err := r.ParseForm()
 		if err != nil {
 			log.Println("error parse form :", err)
@@ -48,19 +60,47 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			UserID:  user.ID,
 			Title:   title,
 			Content: content,
+			Created: time.Now().Format("2006-01-02 15:04:05"),
 		}
 		postId, err := h.services.Post.CreatePost(newPost)
 		if err != nil {
+			form := forms.New(r.PostForm)
 			log.Printf("Post: Create Post: %v\n", err)
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
+			if errors.Is(err, service.ErrPostTitleLen) {
+				form.MaxLength("title", 100)
+			} else if errors.Is(err, service.ErrPostContentLen) {
+				form.MaxLength("content", 1500)
+			} else if errors.Is(err, service.ErrInvalidPost) {
+				form.Required("title", "content")
+			} else {
+				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				return
+			}
+			if !form.Valid() {
+				categories, err := h.services.GetAllCategories()
+				if err != nil {
+					log.Println("home page : get all categories", err)
+					h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+					return
+				}
+				Form := NewForms{
+					Form:     *form,
+					Category: categories,
+				}
+				if err := h.tmpl.ExecuteTemplate(w, "createPost.html", Form); err != nil {
+					log.Println(err.Error())
+					h.errorHandler(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+				return
+			}
 		}
 		if err = h.services.Post.CreatePostCategory(postId, categories); err != nil {
 			log.Printf("Post: Create PostCategory : %v\n", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		log.Println("Create Post: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
@@ -69,17 +109,17 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		user, ok := r.Context().Value(key).(models.User)
-		if !ok {
-			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
-			return
-		}
+		user := r.Context().Value(key).(models.User)
 
 		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
 
 		post, err := h.services.Post.GetPost(id)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)
+			if errors.Is(err, sql.ErrNoRows) {
+				h.errorHandler(w, http.StatusNotFound, err.Error())
+				return
+			}
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
@@ -130,16 +170,8 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			Comments: comments,
 			PostLike: newPostLike,
 		}
-		ts, err := template.ParseFiles("./ui/templates/post.html")
-		if err != nil {
-			log.Printf("Get Post: Execute:%v", err)
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		err = ts.Execute(w, info)
-		if err != nil {
-			log.Println(err.Error())
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		if err := h.tmpl.ExecuteTemplate(w, "post.html", info); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 	} else {
@@ -149,17 +181,17 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
-	// if r.URL.Path != "/post-like/" {
-	// 	h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-	// 	return
-	// }
-	if r.Method == "GET" {
-		user, ok := r.Context().Value(key).(models.User)
-		if !ok {
-			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method == "POST" {
+		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-like/"))
+		if err != nil {
+			h.errorHandler(w, http.StatusNotFound, err.Error())
 			return
 		}
-		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-like/"))
 		newPostLike := models.PostLike{
 			UserID: user.ID,
 			PostID: id,
@@ -171,18 +203,30 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+	} else {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
 }
 
 func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method == "POST" {
 		user, ok := r.Context().Value(key).(models.User)
 		if !ok {
 			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
 			return
 		}
-		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-dislike/"))
+		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-dislike/"))
+		if err != nil {
+			h.errorHandler(w, http.StatusNotFound, err.Error())
+			return
+		}
 		newPostLike := models.PostLike{
 			UserID: user.ID,
 			PostID: id,
@@ -194,6 +238,9 @@ func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, 302)
+		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+	} else {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
 }
