@@ -52,12 +52,21 @@
 <body>
     <h1>Create a New Post</h1>
     <form method="POST" action="/create-post">
-        <label for="title"><b>Title</b></label><br>
-        <input type="text" name="title"><br>
+      {{with .Form}}
+      <label for="title"><b>Title</b></label><br>
+        {{with .Errors.Get "title"}}
+          <label class="error" style="color:red">{{.}}</label>
+        {{end}}
+        <input type="text" name="title" value='{{.Get "title"}}'><br>
 
         <label for="content"><b>Content</b></label><br>
+
+        {{with .Errors.Get "content"}}
+          <label class="error" style="color:red">{{.}}</label>
+        {{end}}
         <textarea rows="10" cols="30" name="content"></textarea><br>
         
+      {{end}}
         <label for="categories">Categories</label><br>
         <select size="3" multiple id="categories "name="categories">
           {{range .Category}}
@@ -65,6 +74,7 @@
           {{end}}
         </select><br>
         <button type="submit">Create</button> 
-    </form>
+      </form>
+  
 </body>
 </html>

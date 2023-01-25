@@ -14,7 +14,7 @@
             {{if .User.Username}}
                 <div class="username">{{.User.Username}}</div>
                 <div class="log-out">
-                    <form action="/auth/logout" method="POST">
+                    <form action="/auth/logout" method="GET">
                         <input type="hidden" name="token" value="{{.User.Token}}">
                         <button>Logout</button>
                     </form>
@@ -51,7 +51,8 @@
                 {{if .User.Username}}
                 <div class="filters">
                     <div class="created-post">
-                        <a href="/?time=new">Created post</a>
+                        <a href="/?time=new">Latest post</a>
+                        <a href="/?time=old">Oldest post</a>
                     </div>
                     <div class="liked-post">
                         <a href="/?like=most">Most liked</a>
@@ -67,6 +68,9 @@
        <div class="posts">
            {{range .Posts}}
             <div class="post-item">
+                <div class="time">
+                    {{.Created}}
+                </div>
                 <p hidden>{{.ID}}</p>
                 <div class="post-author">
                     From: {{.Author}}
@@ -80,8 +84,8 @@
                 {{end}}
                 </div>
                 <div class="likes-post">
-                    <span>Like</span>
-                    <span>Dislike</span>
+                    <span>Like {{.Likes}}</span>
+                    <span>Dislike {{.Dislikes}}</span>
                 </div>
             </div>
             {{end}}

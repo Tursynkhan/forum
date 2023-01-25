@@ -9,7 +9,7 @@
 </head>
 <body>
     <header class="header">
-        <div class="title">Forum</div>
+        <a href="/">Forum</a>
         <div class="auth">
             {{if .User.Username}}
                 <div class="username">{{.User.Username}}</div>
@@ -28,6 +28,9 @@
     </header>
     <div class="container">
         <div class="post">
+            <div class="time">
+                {{.Post.Created}}
+            </div>
             <div class="author">
                 Author:{{.Post.Author}}
             </div>
@@ -42,33 +45,56 @@
                     {{.}}
                 {{end}}
             </div>
-            <div class="reaction">
-                <a href="/post-like/{{.Post.ID}}">Like</a>
-                <span class="count-likes">{{.PostLike.Likes}}</span>
-                <a href="/post-dislike/{{.Post.ID}}">Dislike</a>
-                <span class="count-dislikes">{{.PostLike.Dislikes}}</span>
+            <div class="reaction" style="display:flex">
+                <form action="/post-like/{{.Post.ID}}" method="POST">
+                    <button id="like" {{ if not .User.Username }} disabled {{ end }}>
+                        Like
+                    </button>
+                    <span class="count-likes">{{.PostLike.Likes}}</span>
 
+                </form>
+                <form action="/post-dislike/{{.Post.ID}}" method="POST">
+                    <button id="dislike" {{ if not .User.Username }} disabled {{ end }}>
+                        Disikes 
+                    </button>
+                    <span class="count-dislikes">{{.PostLike.Dislikes}} </span>
+
+                </form>
             </div>
         </div>
+        {{ $user := .User.Username }}
         <h4>Comments</h4>
         <div class="comments">
             <div id="comments-list">
                 {{range .Comments}}
                 <div class="comment-item">
+                    <div class="time">
+                        Author: {{.Author}}
+                    </div>
                     <div class="content">
                         {{.Content}}
                     </div>
-                    <div class="reaction">
-                        <a href="/comment-like/{{.ID}}">Like</a>
-                        <span class="count-likes">{{.Likes}}</span>
-                        <a href="/comment-dislike/{{.ID}}">Dislike</a>
-                        <span class="count-dislikes">{{.Dislikes}}</span>
+                    <div class="reaction" style="display:flex">
+                        <form action="/comment-like/{{.ID}}" method="POST">
+                            <button {{ if not $user }} disabled {{ end }}>
+                                Like
+                            </button>
+                            <span class="count-likes">{{.Likes}}</span>
+                            
+                        </form>
+                        <form action="/comment-dislike/{{.ID}}" method="POST">
+                            <button {{ if not $user }} disabled {{ end }}>
+                                Disikes 
+                            </button>
+                            <span class="count-dislikes">{{.Dislikes}} </span>
+                            
+                        </form>
                     </div>
                 </div>
                 {{end}}
             </div>
         </div>
-
+        {{if .User.Username}}
         <h4>Leave a Comment</h4>
         <form class="comment-form" method="POST" action="/create-comment">
             <input type="hidden" name ="postId"value="{{.Post.ID}}">
@@ -78,6 +104,7 @@
             <br>
             <button type="submit">Post Comment</button>
         </form>
+        {{end}}
     </div>
 </body>
 </html>
