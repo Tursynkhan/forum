@@ -10,7 +10,6 @@ type Repository struct {
 	Comment
 	VotePost
 	VoteComment
-	Session
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -20,6 +19,5 @@ func NewRepository(db *sql.DB) *Repository {
 		Comment:      NewCommentRepository(db),
 		VotePost:     NewVotePostRepository(db),
 		VoteComment:  NewVoteCommentRepository(db),
-		Session:      NewRepository(db),
 	}
 }
