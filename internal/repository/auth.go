@@ -19,6 +19,7 @@ type Autorization interface {
 	SaveToken(user models.User, sessionToken string, time time.Time) error
 	GetUserByToken(token string) (models.User, error)
 	DeleteToken(token string) error
+	DeleteTokenWhenExpireTime() error
 }
 
 func NewAuthRepository(db *sql.DB) *AuthSql {
@@ -90,6 +91,14 @@ func (r *AuthSql) DeleteToken(token string) error {
 	_, err := r.db.Exec("DELETE FROM session WHERE Token=?", token)
 	if err != nil {
 		return fmt.Errorf("repository : delete token : %w", err)
+	}
+	return nil
+}
+
+func (r *AuthSql) DeleteTokenWhenExpireTime() error {
+	_, err := r.db.Exec("DELETE FROM session WHERE ExpireTime <= ?", time.Now())
+	if err != nil {
+		return fmt.Errorf("repository : DeleteTokenWhenExpireTime : %w", err)
 	}
 	return nil
 }
