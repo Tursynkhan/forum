@@ -1,15 +1,14 @@
 package delivery
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
-	"text/template"
 )
 
 type data struct {
 	Status  int
 	Message string
-	ErrText string
 }
 
 func (h *Handler) errorHandler(w http.ResponseWriter, code int, errorText string) {
@@ -17,20 +16,12 @@ func (h *Handler) errorHandler(w http.ResponseWriter, code int, errorText string
 	d := data{
 		Status:  code,
 		Message: http.StatusText(code),
-		ErrText: errorText,
 	}
-	if d.Status != http.StatusInternalServerError {
+	if d.Status != 500 {
 		temp := strings.Split(errorText, ":")
-		d.ErrText = temp[len(temp)-1]
+		d.Message = temp[len(temp)-1]
 	}
-	ts, err := template.ParseFiles("./ui/templates/error.html")
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	err = ts.Execute(w, d)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+	if err := h.tmpl.ExecuteTemplate(w, "error.html", d); err != nil {
+		fmt.Fprintf(w, "%d - %s\n", d.Status, d.Message)
 	}
 }

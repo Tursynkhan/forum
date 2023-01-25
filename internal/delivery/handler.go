@@ -18,24 +18,29 @@ func NewHandler(services *service.Service) *Handler {
 	}
 }
 
-func (h *Handler) InitRoutes() http.Handler {
+func (h *Handler) InitRoutes() *http.ServeMux {
+	m := new(middleware)
+	m.addMidlleware(h.userIdentity)
+	m.addMidlleware(h.logRequest)
+	m.addMidlleware(h.secureHeaders)
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", h.userIdentity(h.home))
-	mux.HandleFunc("/auth/signup", h.signUp)
-	mux.HandleFunc("/auth/signin", h.signIn)
-	mux.HandleFunc("/auth/logout", h.logout)
+	mux.HandleFunc("/", m.chain(h.home))
+	mux.HandleFunc("/auth/signup", m.chain(h.signUp))
+	mux.HandleFunc("/auth/signin", m.chain(h.signIn))
+	mux.HandleFunc("/auth/logout", m.chain(h.logout))
 
-	mux.HandleFunc("/create-post", h.userIdentity(h.createPost))
-	mux.HandleFunc("/get-post/", h.userIdentity(h.getPost))
-	mux.HandleFunc("/post-like/", h.userIdentity(h.postLike))
-	mux.HandleFunc("/post-dislike/", h.userIdentity(h.postDislike))
+	mux.HandleFunc("/create-post", m.chain(h.createPost))
+	mux.HandleFunc("/get-post/", m.chain(h.getPost))
+	mux.HandleFunc("/post-like/", m.chain(h.postLike))
+	mux.HandleFunc("/post-dislike/", m.chain(h.postDislike))
 
-	mux.HandleFunc("/create-comment", h.userIdentity(h.createComment))
-	mux.HandleFunc("/comment-like/", h.userIdentity(h.commentLike))
-	mux.HandleFunc("/comment-dislike/", h.userIdentity(h.commentDislike))
+	mux.HandleFunc("/create-comment", m.chain(h.createComment))
+	mux.HandleFunc("/comment-like/", m.chain(h.commentLike))
+	mux.HandleFunc("/comment-dislike/", m.chain(h.commentDislike))
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	return h.logRequest(h.secureHeaders(mux))
+	return mux
 }
