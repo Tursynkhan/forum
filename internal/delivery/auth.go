@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"errors"
-	"fmt"
 	"forum/internal/forms"
 	"forum/internal/models"
 	"forum/internal/service"
@@ -16,11 +15,11 @@ type NewForm struct {
 }
 
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
-	// user, ok := h.ctx.Context().Value(key).(models.User)
-	// if !ok {
-	// 	h.errorHandler(w, http.StatusBadRequest, "You already in")
-	// 	return
-	// }
+	user := r.Context().Value(key).(models.User)
+	if user != (models.User{}) {
+		h.errorHandler(w, http.StatusBadRequest, "you already in")
+		return
+	}
 	if r.URL.Path != "/auth/signup" {
 		log.Println("Sign Up:Wrong URL Path")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
@@ -124,7 +123,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Sign In: Generate Token:%v", err)
 			if errors.Is(err, service.ErrUserNotFound) {
-				form.Errors.Add("generic", "Username or Password is incorrect")
+				form.Errors.Add("generic", "Username doesn't exist or Password is incorrect")
 				Form := NewForm{
 					Form: *form,
 				}
@@ -139,7 +138,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.SetCookie(w, &http.Cookie{
-			Name:    "session_token",
+			Name:    "token",
 			Value:   sessionToken,
 			Expires: expireTime,
 			Path:    "/",
@@ -149,14 +148,19 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusBadRequest, "can't log-out,without log-in")
+		return
+	}
 	if r.URL.Path != "/auth/logout" {
 		log.Println("Sign In : Wrong URL Path")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-	if r.Method == "POST" {
+	if r.Method == "GET" {
 		var err error
-		token, err := r.Cookie("session_token")
+		token, err := r.Cookie("token")
 		if err != nil {
 			if err == http.ErrNoCookie {
 				h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
@@ -169,14 +173,13 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		c := &http.Cookie{
-			Name:    "session_token",
+			Name:    "token",
 			Value:   "",
 			Path:    "/",
-			Expires: time.Unix(0, 0),
+			Expires: time.Now(),
 		}
 		http.SetCookie(w, c)
 
-		fmt.Println("after setcookie logout")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		log.Println("Logout : Method Not Allowed")
