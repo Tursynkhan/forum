@@ -64,10 +64,6 @@ func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }
 
-var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
-var UsernameRX = regexp.MustCompile(`[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
-
 func (f *Form) Minlength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
@@ -89,10 +85,10 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 }
 
 func (f *Form) ErrorField(field string) {
-	// value := f.Get(field)
-	// if value == "" {
-	// 	return
-	// }
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
 	f.Errors.Add(field, "This field is invalid")
 }
 

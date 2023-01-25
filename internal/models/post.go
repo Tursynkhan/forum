@@ -5,4 +5,5 @@ type Post struct {
 	UserID  int
 	Title   string
 	Content string
+	Created string
 }

@@ -6,6 +6,7 @@ type PostInfo struct {
 	Categories []string
 	Title      string
 	Content    string
+	Created    string
 	UserId     int
 	Likes      int
 	Dislikes   int
