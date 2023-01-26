@@ -1,6 +1,7 @@
 package app
 
 import (
+	"forum/internal/config"
 	"forum/internal/delivery"
 	"forum/internal/repository"
 	"forum/internal/server"
@@ -8,10 +9,10 @@ import (
 	"log"
 )
 
-func Run() {
+func Run(cfg *config.Config) {
 	db, err := repository.InitDB(repository.Config{
-		Username: "sqlite3",
-		DBName:   "forumDB.db",
+		DBName:   cfg.Database.DBName,
+		Username: cfg.Database.Name,
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
@@ -25,8 +26,7 @@ func Run() {
 	handlers := delivery.NewHandler(services)
 
 	server := new(server.Server)
-	log.Println("server start: http://127.0.0.1:8080")
-	if err := server.ServerRun("8080", handlers.InitRoutes()); err != nil {
-		log.Fatalf("error ocured while running http server: %s", err.Error())
+	if err := server.ServerRun(cfg, handlers.InitRoutes()); err != nil {
+		log.Fatalf("error ocured while running http server:%s", err.Error())
 	}
 }
