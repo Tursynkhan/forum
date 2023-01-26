@@ -8,26 +8,33 @@
     <title>SignIn | Forum</title>
 </head>
 <body>
-    <form action="/auth/signin" method="post">
-        <div class="container">
-          {{with .Form}}
-            {{with .Errors.Get "generic"}}
-            <div class="error" style="color:white;padding: 10px;border: 1px solid red;background-color: red;">{{.}}</div>
-            {{end}}
-          <label for="name"><b>Username</b></label>
-          <input type="text" placeholder="Enter Username" name="name" value='{{.Get "name"}}' required>
+  <div class="container">
+    <div class="title">
+      <h2>Welcome back</h2>
+      <p>Log in to your account</p>
+    </div>
+    <div class="login-form">
+      <form action="/auth/signin" method="post">
+      {{with .Form}}
+      {{with .Errors.Get "generic"}}
+      <div class="error" style="width:80%;margin:0 auto;color:white;padding: 10px;border: 1px solid red;background-color: red;margin-bottom: 10px;border-radius: 4px;">{{.}}</div>
+      {{end}}
+          
+      <input type="text" placeholder="Enter Username" name="name" class="field"  value='{{.Get "name"}}' required>
+  
+      <input type="password" placeholder="Enter Password" name="psw" class="field"  required>
       
-          <label for="psw"><b>Password</b></label>
-          <input type="password" placeholder="Enter Password" name="psw" required>
-      
-          <button type="submit">Login</button>
-          {{end}}
-        </div>
-      
-        <div class="container" style="background-color:#f1f1f1">
-          <button type="button" class="cancelbtn">Cancel</button>
-          <span class="psw">Forgot <a href="#">password?</a></span>
-        </div>
+      <button type="submit" class="signupbtn">Login</button>
+      {{end}}
       </form> 
+    </div>  
+    <div class="modal-footer">
+      <div class="login">
+        <p class="text">Dont have an account?</p>
+        <a href="/auth/signup">Register</a>
+      </div>
+    </div>
+  </div>
+      
 </body>
 </html>
