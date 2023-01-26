@@ -1,0 +1,11 @@
+{
+    "handler":{
+        "addr":"8080",
+        "write_timeout":10,
+        "read_timeout":10
+    },
+    "database":{
+        "db_name":"forumDB.db",
+        "name":"sqlite3"
+    }
+}
