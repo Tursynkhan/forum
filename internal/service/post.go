@@ -90,11 +90,13 @@ func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostI
 			}
 		} else if key == "select" {
 			for _, w := range val {
-				posts, err = s.repo.GetPostByCategory(w)
+				posts, err = s.repo.GetPostByCategory(strings.ReplaceAll(w, "+", " "))
 				if err != nil {
-					return []models.PostInfo{}, err
+					return []models.PostInfo{}, errors.New("post filter service")
 				}
 			}
+		} else {
+			return []models.PostInfo{}, err
 		}
 	}
 	return posts, nil

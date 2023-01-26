@@ -10,7 +10,6 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 	var posts []models.PostInfo
 	var err error
 	if r.URL.Path != "/" {
-		log.Println("home page : wrong url")
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
