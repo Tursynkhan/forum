@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
 )
@@ -31,11 +32,11 @@ func (s *VoteCommentService) CreateLikeComment(comment models.CommentLike) error
 	}
 	if status == 1 {
 		if err := s.repo.UpdateStatusCommentLike(0, comment); err != nil {
-			return err
+			return fmt.Errorf("service : UpdateStatusCommentLike : %w", err)
 		}
 	} else {
 		if err := s.repo.UpdateStatusCommentLike(1, comment); err != nil {
-			return err
+			return fmt.Errorf("service : UpdateStatusCommentLike : %w", err)
 		}
 	}
 	return nil
@@ -50,24 +51,32 @@ func (s *VoteCommentService) CreateDisLikeComment(comment models.CommentLike) er
 	}
 	if status == 1 {
 		if err := s.repo.UpdateStatusCommentLike(-1, comment); err != nil {
-			return err
+			return fmt.Errorf("service : UpdateStatusCommentLike : %w", err)
 		}
 	} else if status == -1 {
 		if err := s.repo.UpdateStatusCommentLike(0, comment); err != nil {
-			return err
+			return fmt.Errorf("service : UpdateStatusCommentLike : %w", err)
 		}
 	} else {
 		if err := s.repo.UpdateStatusCommentLike(-1, comment); err != nil {
-			return err
+			return fmt.Errorf("service : UpdateStatusCommentLike : %w", err)
 		}
 	}
 	return nil
 }
 
 func (s *VoteCommentService) GetCommentLikesByCommentID(id int) (int, error) {
-	return s.repo.GetCommentLikesByCommentID(id)
+	likes, err := s.repo.GetCommentLikesByCommentID(id)
+	if err != nil {
+		return 0, fmt.Errorf("service : GetCommentLikesByCommentID : %w", err)
+	}
+	return likes, nil
 }
 
 func (s *VoteCommentService) GetCommentDislikesByCommentID(id int) (int, error) {
-	return s.repo.GetCommentDislikesByCommentID(id)
+	dislikes, err := s.repo.GetCommentDislikesByCommentID(id)
+	if err != nil {
+		return 0, fmt.Errorf("service : GetCommentDislikesByCommentID : %w", err)
+	}
+	return dislikes, nil
 }

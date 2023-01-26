@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
 )
@@ -20,13 +21,24 @@ func NewCommentService(repo repository.Comment) *CommentService {
 }
 
 func (s *CommentService) CreateComment(comment models.Comment) error {
-	return s.repo.CreateComment(comment)
+	if err := s.repo.CreateComment(comment); err != nil {
+		return fmt.Errorf("service : comment : CreateComment : %w", err)
+	}
+	return nil
 }
 
 func (s *CommentService) GetAllComments(postId int) ([]models.Comment, error) {
-	return s.repo.GetAllComments(postId)
+	comments, err := s.repo.GetAllComments(postId)
+	if err != nil {
+		return []models.Comment{}, fmt.Errorf("service : comment : GetAllComments : %w", err)
+	}
+	return comments, nil
 }
 
 func (s *CommentService) GetCommentById(id int) (models.Comment, error) {
-	return s.repo.GetCommentById(id)
+	comment, err := s.repo.GetCommentById(id)
+	if err != nil {
+		return models.Comment{}, fmt.Errorf("service : comment : GetCommentById : %w", err)
+	}
+	return comment, nil
 }

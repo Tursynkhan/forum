@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
 	"strings"
@@ -41,19 +42,34 @@ func (s *PostService) CreatePost(post models.Post) (int, error) {
 }
 
 func (s *PostService) GetAllPosts() ([]models.PostInfo, error) {
-	return s.repo.GetAllPosts()
+	posts, err := s.repo.GetAllPosts()
+	if err != nil {
+		return []models.PostInfo{}, fmt.Errorf("service : GetAllPosts: %w", err)
+	}
+	return posts, nil
 }
 
 func (s *PostService) GetPost(id int) (models.PostInfo, error) {
-	return s.repo.GetPost(id)
+	post, err := s.repo.GetPost(id)
+	if err != nil {
+		return models.PostInfo{}, fmt.Errorf("service : GetPost: %w", err)
+	}
+	return post, nil
 }
 
 func (s *PostService) CreatePostCategory(id int, categories []string) error {
-	return s.repo.CreatePostCategory(id, categories)
+	if err := s.repo.CreatePostCategory(id, categories); err != nil {
+		return fmt.Errorf("service : CreatePostCategory %w:", err)
+	}
+	return nil
 }
 
 func (s *PostService) GetAllCategories() ([]models.Category, error) {
-	return s.repo.GetAllCategories()
+	categories, err := s.repo.GetAllCategories()
+	if err != nil {
+		return []models.Category{}, fmt.Errorf("service : GetAllCategories : %w", err)
+	}
+	return categories, nil
 }
 
 func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostInfo, error) {

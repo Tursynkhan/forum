@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
 )
@@ -32,11 +33,11 @@ func (s *VotePostService) CreateLikePost(postLike models.PostLike) error {
 	}
 	if status == 1 {
 		if err := s.repo.UpdateStatusPostLike(0, postLike); err != nil {
-			return err
+			return fmt.Errorf("service : post : UpdateStatusPostLike : %w", err)
 		}
 	} else {
 		if err := s.repo.UpdateStatusPostLike(1, postLike); err != nil {
-			return err
+			return fmt.Errorf("service : post : UpdateStatusPostLike : %w", err)
 		}
 	}
 	return nil
@@ -51,24 +52,32 @@ func (s *VotePostService) CreateDisLikePost(postLike models.PostLike) error {
 	}
 	if status == 1 {
 		if err := s.repo.UpdateStatusPostLike(-1, postLike); err != nil {
-			return err
+			return fmt.Errorf("service : post : UpdateStatusPostLike : %w", err)
 		}
 	} else if status == -1 {
 		if err := s.repo.UpdateStatusPostLike(0, postLike); err != nil {
-			return err
+			return fmt.Errorf("service : post : UpdateStatusPostLike : %w", err)
 		}
 	} else {
 		if err := s.repo.UpdateStatusPostLike(-1, postLike); err != nil {
-			return err
+			return fmt.Errorf("service : post : UpdateStatusPostLike : %w", err)
 		}
 	}
 	return nil
 }
 
 func (s *VotePostService) GetAllLikesByPostId(postId int) (int, error) {
-	return s.repo.GetAllLikesByPostId(postId)
+	likes, err := s.repo.GetAllLikesByPostId(postId)
+	if err != nil {
+		return 0, fmt.Errorf("service : post :  GetAllLikesByPostId : %w", err)
+	}
+	return likes, nil
 }
 
 func (s *VotePostService) GetAllDislikesByPostId(postId int) (int, error) {
-	return s.repo.GetAllDislikesByPostId(postId)
+	dislikes, err := s.repo.GetAllDislikesByPostId(postId)
+	if err != nil {
+		return 0, fmt.Errorf("service : post :  GetAllLikesByPostId : %w", err)
+	}
+	return dislikes, nil
 }
