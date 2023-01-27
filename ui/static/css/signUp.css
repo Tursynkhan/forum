@@ -39,6 +39,9 @@ input:valid{
   padding: 10px;
   margin-bottom:20px;
 }
-.login{
+.login {
   text-align: center;
+}
+button{
+  cursor: pointer;
 }
