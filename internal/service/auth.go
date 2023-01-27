@@ -85,7 +85,7 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 	}
 
 	sessionToken := uuid.NewString()
-	expiresAt := time.Now().Add(60 * time.Second)
+	expiresAt := time.Now().Add(15 * time.Minute)
 
 	if err := s.repo.SaveToken(user, sessionToken, expiresAt); err != nil {
 		return "", time.Time{}, err
