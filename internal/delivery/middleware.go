@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"forum/internal/models"
 	"log"
 	"net/http"
@@ -41,7 +40,6 @@ func (h *Handler) userIdentity(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 			if errors.Is(err, http.ErrNoCookie) {
-				fmt.Println("error", err)
 				next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), key, models.User{})))
 				return
 			}
