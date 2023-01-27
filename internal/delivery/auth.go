@@ -58,18 +58,31 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Sign Up: Create User: %v", err)
 			if errors.Is(err, service.ErrInvalidEmail) {
 				form.ErrorField("email")
+				w.WriteHeader(http.StatusBadRequest)
 			} else if errors.Is(err, service.ErrInvalidPassword) {
 				form.ErrorMatchesPattern("psw")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else if errors.Is(err, service.ErrInvalidUsername) {
 				form.ErrorField("name")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else if errors.Is(err, service.ErrUserExist) {
 				form.IsExist("name", "User exist")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else if errors.Is(err, service.ErrUserNotFound) {
 				form.IsExist("name", "User Not Found")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else if errors.Is(err, service.ErrPasswdNotMatch) {
 				form.IsExist("psw", "Password doesn't match")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else if errors.Is(err, service.ErrEmailExist) {
 				form.IsExist("email", "Email exist")
+				w.WriteHeader(http.StatusBadRequest)
+
 			} else {
 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 				return

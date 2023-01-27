@@ -1,0 +1,35 @@
+html{
+    height: 100%;
+}
+body{
+    background: #e0ebf5;
+}
+.container{
+    margin-top: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+h1{
+    color:black;
+    font-size: 60px;
+}
+p{
+    color: black;
+    margin-top: 0;
+    font-size: 60px;
+}
+a{
+    color:black;
+    font-size: 40px;
+    text-decoration: none;
+    background-color:white;
+    border: 1px solid #3c3e44;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+a:hover{
+    background-color:#3c3e44;
+    color: white;
+}
