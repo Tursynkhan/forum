@@ -10,7 +10,9 @@
 <body>
     <header class="header">
         <div class="header-container">
-            <a href="/" class="header-title">Forum</a>
+            <a href="/" class="header-title">
+                <img src="https://forum.golangbridge.org/uploads/default/original/2X/b/b7c7c811a309cce5ab951588d4302faaa96553b5.png" alt="logo" style="width: 120px;height: 40px;">
+            </a>
             <div class="auth">
                 {{if .User.Username}}
                     <div  class="username">{{.User.Username}}</div>
@@ -68,31 +70,31 @@
         </div>
        <div class="posts">
            <div class="topic">
-                <img src="../static/img/icons8-bullet-list-30.png" alt="list" class="topic-img">
+                <img src="../static/img/list-svgrepo-com.svg" alt="list" class="topic-img" style="height:15px;width:15px;">
                 <div class="topic-title">Topic</div>
             </div>
         {{range .Posts}}
         <div class="post-item">
+            <a href="/get-post/{{.ID}}">
             <div class="post-item-header">
                 <div class="post-author">
-                    By: {{.Author}}
+                    by: {{.Author}}
                 </div>
                 <div class="time">
-                    Created {{.Created}}
+                    created {{.Created}}
                 </div>
             </div>
             <div class="post-title">
-                <a href="/get-post/{{.ID}}">
                     {{.Title}}
-                </a>
-            </div>
-            <div class="categories">
-                {{range .Categories}}
-                <div class="category">
-                    {{.}}
                 </div>
-                {{end}}
-            </div>
+                <div class="categories">
+                    {{range .Categories}}
+                    <div class="category">
+                        {{.}}
+                    </div>
+                    {{end}}
+                </div>
+            </a>
             <div class="like-post">
                 <span class="like"><img src="../static/img/up.png" alt="like"></span>
                 <span class="count">{{.Likes}}</span>

@@ -9,102 +9,114 @@
 </head>
 <body>
     <header class="header">
-        <a href="/">Forum</a>
-        <div class="auth">
-            {{if .User.Username}}
-                <div class="username">{{.User.Username}}</div>
-                <div class="log-out">
-                    <a href="/auth/logout">Log out</a>
+        <div class="header-container">
+            <a href="/" class="header-title">
+                <img src="https://forum.golangbridge.org/uploads/default/original/2X/b/b7c7c811a309cce5ab951588d4302faaa96553b5.png" alt="logo" style="width: 120px;height: 40px;">
+            </a>
+            <div class="auth">
+                {{if .User.Username}}
+                    <div  class="username">{{.User.Username}}</div>
+                    <div class="log-out">
+                        <form action="/auth/logout" method="GET">
+                            <button class="logout">Logout</button>
+                        </form>
+                    </div>
+                {{else}}
+                <div class="sign">
+                    <a href="/auth/signup">Sign Up</a>
                 </div>
-            {{else}}
-            <div class="sign-up">
-                <a href="/auth/signup">Sign Up</a>
+                <div class="sign">
+                    <a href="/auth/signin">Log in</a>
+                </div>
+                {{end}}
             </div>
-            <div class="sign-in">
-                <a href="/auth/signin">Log in</a>
-            </div>
-            {{end}}
         </div>
     </header>
     <div class="container">
         <div class="post">
-            <div class="time">
-                {{.Post.Created}}
-            </div>
-            <div class="author">
-                Author:{{.Post.Author}}
+            <div class="post-header">
+                <div class="title">title: <spanc class="post-title">{{.Post.Title}}</span></div>
+                <div class="time">
+                    {{.Post.Created}}
+                </div>
             </div>
             <div class="header__post">
-                <div class="title">Title:{{.Post.Title}}</div>
+                <div class="author">
+                    author:{{.Post.Author}}
+                </div>
             </div>
-            <div class="post">
-                <p>{{.Post.Content}}</p>
-            </div>
-            <div class="tags">Tags:
+            <div class="tags">
                 {{range .Post.Categories}}
+                <div class="category">
                     {{.}}
-                {{end}}
-            </div>
-            <div class="reaction" style="display:flex">
-                <form action="/post-like/{{.Post.ID}}" method="POST">
-                    <button id="like" {{ if not .User.Username }} disabled {{ end }}>
-                        Like
-                    </button>
-                    <span class="count-likes">{{.PostLike.Likes}}</span>
-
-                </form>
-                <form action="/post-dislike/{{.Post.ID}}" method="POST">
-                    <button id="dislike" {{ if not .User.Username }} disabled {{ end }}>
-                        Disikes 
-                    </button>
-                    <span class="count-dislikes">{{.PostLike.Dislikes}} </span>
-
-                </form>
-            </div>
-        </div>
-        {{ $user := .User.Username }}
-        <h4>Comments</h4>
-        <div class="comments">
-            <div id="comments-list">
-                {{range .Comments}}
-                <div class="comment-item">
-                    <div class="time">
-                        Author: {{.Author}}
-                    </div>
-                    <div class="content">
-                        {{.Content}}
-                    </div>
-                    <div class="reaction" style="display:flex">
-                        <form action="/comment-like/{{.ID}}" method="POST">
-                            <button {{ if not $user }} disabled {{ end }}>
-                                Like
-                            </button>
-                            <span class="count-likes">{{.Likes}}</span>
-                            
-                        </form>
-                        <form action="/comment-dislike/{{.ID}}" method="POST">
-                            <button {{ if not $user }} disabled {{ end }}>
-                                Disikes 
-                            </button>
-                            <span class="count-dislikes">{{.Dislikes}} </span>
-                            
-                        </form>
-                    </div>
                 </div>
                 {{end}}
             </div>
+            <div class="post-content">
+                <p>{{.Post.Content}}</p>
+            </div>
+            <div class="reaction" style="display:flex">
+                <form  action="/post-like/{{.Post.ID}}" method="POST">
+                    <button  class="like" {{ if not .User.Username }} disabled {{ end }}>
+                        <img src="../static/img/like.svg" alt="like" class="like" >
+                    </button>
+                </form>
+                <span class="count-likes">{{.PostLike.Likes}}</span>
+                <form action="/post-dislike/{{.Post.ID}}" method="POST">
+                    <button  class="dislike" {{ if not .User.Username }} disabled {{ end }}>
+                        <img src="../static/img/dislike.svg" alt="dislike" class="dislike" >
+                    </button>
+                </form>
+                <span class="count-dislikes">{{.PostLike.Dislikes}} </span>
+            </div>
         </div>
-        {{if .User.Username}}
-        <h4>Leave a Comment</h4>
-        <form class="comment-form" method="POST" action="/create-comment">
-            <input type="hidden" name ="postId"value="{{.Post.ID}}">
-            <input type="hidden" name ="uerId" value="{{.Post.UserId}}">
-            <label for="comment">Comment:</label>
-            <textarea id="comment" name="comment" required></textarea>
-            <br>
-            <button type="submit">Post Comment</button>
-        </form>
-        {{end}}
-    </div>
+        {{ $user := .User.Username }}
+        <div class="comment-header">
+            Comments
+        </div>
+        <div class="comments">
+            <div class="comment-list">
+                    {{range .Comments}}
+                    <div class="comment-item">
+                        <div class="comment-author">
+                            {{.Author}}
+                        </div>
+                        <div class="com-content">
+                            {{.Content}}
+                        </div>
+                        <div class="com-reaction" style="display:flex">
+                            <form action="/comment-like/{{.ID}}" method="POST">
+                                <button {{ if not $user }} disabled {{ end }}>
+                                    <img src="../static/img/like.svg" alt="like" class="com-like" >
+                                </button>
+                                <span class="count-likes">{{.Likes}}</span>
+                                
+                            </form>
+                            <form action="/comment-dislike/{{.ID}}" method="POST">
+                                <button {{ if not $user }} disabled {{ end }}>
+                                    <img src="../static/img/dislike.svg" alt="dislike" class="com-dislike" >
+                                </button>
+                                <span class="count-dislikes">{{.Dislikes}} </span>
+                                
+                            </form>
+                        </div>
+                    </div>
+                    {{end}}
+            </div>
+            {{if .User.Username}}
+            <div class="create-comment">
+                <form class="comment-form" method="POST" action="/create-comment">
+                    <fieldset>
+                        <legend>Create comment:</legend>
+                        <input type="hidden" name ="postId"value="{{.Post.ID}}">
+                        <input type="hidden" name ="uerId" value="{{.Post.UserId}}">
+                        <textarea class="comment" name="comment" required></textarea>
+                        <button type="submit" class="submit">Submit</button>
+                    </fieldset>
+                </form>
+            </div>
+            {{end}}
+        </div>
+        </div>
 </body>
 </html>
