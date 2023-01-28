@@ -17,7 +17,7 @@
       <form action="/auth/signin" method="post">
       {{with .Form}}
       {{with .Errors.Get "generic"}}
-      <div class="error" style="width:80%;margin:0 auto;color:white;padding: 10px;border: 1px solid red;background-color: red;margin-bottom: 10px;border-radius: 4px;">{{.}}</div>
+      <div class="error" style="width:100%;margin:0 auto;color:white;padding: 10px;border: 1px solid red;background-color: red;margin-bottom: 10px;border-radius: 4px;">{{.}}</div>
       {{end}}
           
       <input type="text" placeholder="Enter Username" name="name" class="field"  value='{{.Get "name"}}' required>

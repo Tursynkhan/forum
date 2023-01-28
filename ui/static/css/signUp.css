@@ -45,3 +45,15 @@ input:valid{
 button{
   cursor: pointer;
 }
+.pass {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+form i {
+  cursor: pointer;
+  position: absolute;
+  right: 5%;
+  top: 15%;
+}

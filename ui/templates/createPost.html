@@ -29,7 +29,7 @@
           
         {{end}}
           <label for="categories">Categories</label><br>
-          <select size="3" multiple id="categories "name="categories">
+          <select size="3" multiple id="categories "name="categories" required>
             {{range .Category}}
             <option value="{{.ID}}">{{.Name}}</option>
             {{end}}
