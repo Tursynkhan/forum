@@ -18,6 +18,8 @@ type Autorization interface {
 	GetEmail(email string) (models.User, error)
 	SaveToken(user models.User, sessionToken string, time time.Time) error
 	GetUserByToken(token string) (models.User, error)
+	GetToken(username string) (string, error)
+	UpdateToken(tokenName, newToken string, expireTime time.Time) error
 	DeleteToken(token string) error
 	DeleteTokenWhenExpireTime() error
 }
@@ -101,4 +103,26 @@ func (r *AuthSql) DeleteTokenWhenExpireTime() error {
 		return fmt.Errorf("repository : DeleteTokenWhenExpireTime : %w", err)
 	}
 	return nil
+}
+
+func (r *AuthSql) UpdateToken(tokenName, newToken string, expireTime time.Time) error {
+	_, err := r.db.Exec("UPDATE session SET Token=?, ExpireTime=? WHERE Token=?", newToken, expireTime, tokenName)
+	if err != nil {
+		return fmt.Errorf("repository : UpdateToken : %w", err)
+	}
+	return nil
+}
+
+func (r *AuthSql) GetToken(username string) (string, error) {
+	row := r.db.QueryRow("SELECT session.Token FROM session JOIN users ON users.Id=session.UserId WHERE users.Username=?", username)
+	token := ""
+	err := row.Scan(&token)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", err
+		} else {
+			return "", fmt.Errorf("repository : GetToken : %w", err)
+		}
+	}
+	return token, nil
 }

@@ -83,13 +83,25 @@ func (s *AuthService) GenerateToken(username, password string) (string, time.Tim
 	if err := checkHash(user.Password, password); err != nil {
 		return "", time.Time{}, fmt.Errorf("service : compare hash and password : %v: %w", err, ErrUserNotFound)
 	}
+	getToken, err := s.repo.GetToken(username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			sessionToken := uuid.NewString()
+			expiresAt := time.Now().Add(15 * time.Minute)
 
+			if err := s.repo.SaveToken(user, sessionToken, expiresAt); err != nil {
+				return "", time.Time{}, err
+			}
+			return sessionToken, expiresAt, nil
+		}
+		return "", time.Time{}, fmt.Errorf("getToken : %w", err)
+	}
 	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(15 * time.Minute)
-
-	if err := s.repo.SaveToken(user, sessionToken, expiresAt); err != nil {
+	if err := s.repo.UpdateToken(getToken, sessionToken, expiresAt); err != nil {
 		return "", time.Time{}, err
 	}
+
 	return sessionToken, expiresAt, nil
 }
 
