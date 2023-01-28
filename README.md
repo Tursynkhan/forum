@@ -17,7 +17,7 @@ git clone git@git.01.alem.school:tursynkhan/forum.git
 ```
 
 
-##Usage
+## Usage
 
 ```bash
     go run ./cmd/main.go
