@@ -79,6 +79,7 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			form := forms.New(r.PostForm)
 			form.Required("title", "content", "categories")
+			w.WriteHeader(http.StatusBadRequest)
 			log.Printf("Post: Create Post: %v\n", err)
 			if errors.Is(err, service.ErrPostTitleLen) {
 				form.MaxLength("title", 100)

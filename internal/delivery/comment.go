@@ -19,11 +19,22 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	postId, _ := strconv.Atoi(r.PostFormValue("postId"))
-	comment := r.PostFormValue("comment")
-
+	postId, err := strconv.Atoi(r.PostFormValue("postId"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	comment, ok := r.Form["comment"]
+	if !ok {
+		h.errorHandler(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		return
+	}
+	if len(comment[0]) == 0 {
+		h.errorHandler(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		return
+	}
 	newComment := models.Comment{
-		Content: comment,
+		Content: comment[0],
 		UserID:  user.ID,
 		PostID:  postId,
 	}
@@ -45,7 +56,11 @@ func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
-	id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-like/"))
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-like/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
 	newCommentLike := models.CommentLike{
 		UserID:    user.ID,
 		CommentID: id,
@@ -76,7 +91,11 @@ func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
-	id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-dislike/"))
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment-dislike/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
 	newCommentLike := models.CommentLike{
 		UserID:    user.ID,
 		CommentID: id,

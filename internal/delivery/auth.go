@@ -71,6 +71,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		if err := h.services.Autorization.CreateUser(newUser); err != nil {
 			form := forms.New(r.PostForm)
 			form.Required("name", "email", "psw")
+			w.WriteHeader(http.StatusBadRequest)
 			log.Printf("Sign Up: Create User: %v", err)
 			if errors.Is(err, service.ErrInvalidEmail) {
 				form.ErrorField("email")
