@@ -128,6 +128,13 @@ func checkUser(user models.User) error {
 			return fmt.Errorf("service: CreateUser: checkUser : %w", ErrInvalidUsername)
 		}
 	}
+	validUsername, err := regexp.MatchString(`[a-zA-Z0-9]{3,12}$`, user.Username)
+	if err != nil {
+		return err
+	}
+	if !validUsername {
+		return ErrInvalidUsername
+	}
 	validEmail, err := regexp.MatchString(`[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`, user.Email)
 	if err != nil {
 		return err

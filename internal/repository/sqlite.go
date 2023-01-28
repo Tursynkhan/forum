@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Host     string
 	Port     string
-	Username string
+	Name     string
 	Password string
 	DBName   string
 	SSLMode  string
@@ -83,7 +83,7 @@ const (
 )
 
 func InitDB(cfg Config) (*sql.DB, error) {
-	db, err := sql.Open(cfg.Username, cfg.DBName)
+	db, err := sql.Open(cfg.Name, cfg.DBName+"?_foreign_keys=on")
 	if err != nil {
 		return nil, err
 	}

@@ -11,8 +11,8 @@ import (
 
 func Run(cfg *config.Config) {
 	db, err := repository.InitDB(repository.Config{
-		DBName:   cfg.Database.DBName,
-		Username: cfg.Database.Name,
+		DBName: cfg.Database.DBName,
+		Name:   cfg.Database.Name,
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())

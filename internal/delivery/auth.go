@@ -41,16 +41,32 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		name := r.FormValue("name")
-		email := r.FormValue("email")
-		psw := r.FormValue("psw")
-		pswRepeat := r.FormValue("psw-repeat")
+		name, ok := r.Form["name"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "email field not found")
+			return
+		}
+		email, ok := r.Form["email"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "username field not found")
+			return
+		}
+		psw := r.Form["psw"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "password field not found")
+			return
+		}
+		pswRepeat := r.Form["psw-repeat"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "psw-repeat field not found")
+			return
+		}
 
 		newUser := models.User{
-			Username:       name,
-			Email:          email,
-			Password:       psw,
-			RepeatPassword: pswRepeat,
+			Username:       name[0],
+			Email:          email[0],
+			Password:       psw[0],
+			RepeatPassword: pswRepeat[0],
 		}
 		if err := h.services.Autorization.CreateUser(newUser); err != nil {
 			form := forms.New(r.PostForm)
@@ -128,11 +144,18 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		name := r.FormValue("name")
-		psw := r.FormValue("psw")
-
+		name, ok := r.Form["name"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "name field not found")
+			return
+		}
+		psw, ok := r.Form["psw"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "psw field not found")
+			return
+		}
 		form := forms.New(r.PostForm)
-		sessionToken, expireTime, err := h.services.GenerateToken(name, psw)
+		sessionToken, expireTime, err := h.services.GenerateToken(name[0], psw[0])
 		if err != nil {
 			log.Printf("Sign In: Generate Token:%v", err)
 			if errors.Is(err, service.ErrUserNotFound) {
@@ -157,6 +180,10 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			Path:    "/",
 		})
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+	} else {
+		log.Println("Sign Up: Method not allowed")
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
 }
 

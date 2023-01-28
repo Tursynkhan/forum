@@ -22,6 +22,7 @@ type Post interface {
 	GetPostsByNewest() ([]models.PostInfo, error)
 	GetPostsByOldest() ([]models.PostInfo, error)
 	GetPostByCategory(category string) ([]models.PostInfo, error)
+	GetLenAllPost() (int, error)
 }
 
 func NewPostRepository(db *sql.DB) *PostRepository {
@@ -331,4 +332,18 @@ func (r *PostRepository) GetPostsByOldest() ([]models.PostInfo, error) {
 		posts = append(posts, p)
 	}
 	return posts, nil
+}
+
+func (r *PostRepository) GetLenAllPost() (int, error) {
+	row := r.db.QueryRow("SELECT COUNT (*) FROM posts")
+	count := 0
+	err := row.Scan(&count)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else {
+			return 0, fmt.Errorf("repository: GetLenAllPost : %w", err)
+		}
+	}
+	return count, nil
 }

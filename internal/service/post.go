@@ -15,6 +15,7 @@ type Post interface {
 	CreatePostCategory(id int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
 	GetPostByFilter(query map[string][]string) ([]models.PostInfo, error)
+	GetLenAllPost() (int, error)
 }
 
 type PostService struct {
@@ -116,6 +117,14 @@ func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostI
 		}
 	}
 	return posts, nil
+}
+
+func (s *PostService) GetLenAllPost() (int, error) {
+	count, err := s.repo.GetLenAllPost()
+	if err != nil {
+		return 0, fmt.Errorf("service : post : GetLenAllPost %w", err)
+	}
+	return count, nil
 }
 
 func checkPost(post models.Post) error {

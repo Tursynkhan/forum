@@ -20,6 +20,7 @@ type NewForms struct {
 
 func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(key).(models.User)
+
 	if user == (models.User{}) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
@@ -37,7 +38,6 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-
 		Form := NewForms{
 			Form:     *forms.New(nil),
 			Category: categories,
@@ -51,28 +51,46 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
 			log.Println("error parse form :", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		title := r.PostFormValue("title")
-		content := r.PostFormValue("content")
-		categories := r.Form["categories"]
+		title, ok := r.Form["title"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "title field not found")
+			return
+		}
+		content, ok := r.Form["content"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "content field not found")
+			return
+		}
+		categories, ok := r.Form["categories"]
+		if !ok {
+			h.errorHandler(w, http.StatusBadRequest, "categories field not found")
+			return
+		}
 		newPost := models.Post{
 			UserID:  user.ID,
-			Title:   title,
-			Content: content,
+			Title:   title[0],
+			Content: content[0],
 			Created: time.Now().Format("2006-01-02 15:04:05"),
 		}
 		postId, err := h.services.Post.CreatePost(newPost)
 		if err != nil {
 			form := forms.New(r.PostForm)
+			form.Required("title", "content", "categories")
 			log.Printf("Post: Create Post: %v\n", err)
 			if errors.Is(err, service.ErrPostTitleLen) {
 				form.MaxLength("title", 100)
+				w.WriteHeader(http.StatusBadRequest)
 			} else if errors.Is(err, service.ErrPostContentLen) {
 				form.MaxLength("content", 1500)
+				w.WriteHeader(http.StatusBadRequest)
 			} else if errors.Is(err, service.ErrInvalidPost) {
 				form.Required("title", "content")
+				w.WriteHeader(http.StatusBadRequest)
 			} else {
+				log.Println(err)
 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 				return
 			}
@@ -104,15 +122,27 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 	} else {
 		log.Println("Create Post: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
 }
 
 func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		user := r.Context().Value(key).(models.User)
-
-		id, _ := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
-
+		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
+		if err != nil {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		lenPost, err := h.services.GetLenAllPost()
+		if err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		if id > lenPost || id <= 0 {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
 		post, err := h.services.Post.GetPost(id)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)

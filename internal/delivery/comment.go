@@ -10,27 +10,29 @@ import (
 )
 
 func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		user := r.Context().Value(key).(models.User)
-		if user == (models.User{}) {
-			h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
-			return
-		}
-		postId, _ := strconv.Atoi(r.PostFormValue("postId"))
-		comment := r.PostFormValue("comment")
-
-		newComment := models.Comment{
-			Content: comment,
-			UserID:  user.ID,
-			PostID:  postId,
-		}
-		if err := h.services.CreateComment(newComment); err != nil {
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		Idpost := strconv.Itoa(postId)
-		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+	if r.Method != "POST" {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	postId, _ := strconv.Atoi(r.PostFormValue("postId"))
+	comment := r.PostFormValue("comment")
+
+	newComment := models.Comment{
+		Content: comment,
+		UserID:  user.ID,
+		PostID:  postId,
+	}
+	if err := h.services.CreateComment(newComment); err != nil {
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	Idpost := strconv.Itoa(postId)
+	http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
 }
 
 func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
