@@ -14,7 +14,7 @@ type Post interface {
 	GetPost(id int) (models.PostInfo, error)
 	CreatePostCategory(id int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
-	GetPostByFilter(query map[string][]string) ([]models.PostInfo, error)
+	GetPostByFilter(query map[string][]string, user models.User) ([]models.PostInfo, error)
 	GetLenAllPost() (int, error)
 }
 
@@ -73,7 +73,7 @@ func (s *PostService) GetAllCategories() ([]models.Category, error) {
 	return categories, nil
 }
 
-func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostInfo, error) {
+func (s *PostService) GetPostByFilter(query map[string][]string, user models.User) ([]models.PostInfo, error) {
 	var posts []models.PostInfo
 	var err error
 	for key, val := range query {
@@ -105,9 +105,23 @@ func (s *PostService) GetPostByFilter(query map[string][]string) ([]models.PostI
 					}
 				}
 			}
+		} else if key == "my" {
+			for _, w := range val {
+				if w == "post" {
+					posts, err = s.repo.GetMyPosts(user)
+					if err != nil {
+						return []models.PostInfo{}, nil
+					}
+				} else if w == "like" {
+					posts, err = s.repo.GetMyLikedPosts(user)
+					if err != nil {
+						return []models.PostInfo{}, nil
+					}
+				}
+			}
 		} else if key == "select" {
 			for _, w := range val {
-				posts, err = s.repo.GetPostByCategory(strings.ReplaceAll(w, "+", " "))
+				posts, err = s.repo.GetPostByCategory(w)
 				if err != nil {
 					return []models.PostInfo{}, errors.New("post filter service")
 				}

@@ -52,17 +52,21 @@
                 </script>
             </div>
             <div class="right-navbar">
-                {{if .User.Username}}
                 <div class="filters">
                     <div class="created-post">
                         <a href="/?time=new">Latest post</a>
                         <a href="/?time=old">Oldest post</a>
                     </div>
+                {{if .User.Username}}
                     <div class="liked-post">
                         <a href="/?like=most">Most liked</a>
                         <a href="/?like=least">Least liked</a>
+                        <a href="/?my=post">My posts</a>
+                        <a href="/?my=like">My liked posts</a>
                     </div>
+                    {{end}}
                 </div>
+                {{if .User.Username}}
                 <div class="create-post">
                     <a href="/create-post">New Post</a>
                 </div>

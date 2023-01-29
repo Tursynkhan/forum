@@ -23,6 +23,8 @@ type Post interface {
 	GetPostsByOldest() ([]models.PostInfo, error)
 	GetPostByCategory(category string) ([]models.PostInfo, error)
 	GetLenAllPost() (int, error)
+	GetMyPosts(user models.User) ([]models.PostInfo, error)
+	GetMyLikedPosts(user models.User) ([]models.PostInfo, error)
 }
 
 func NewPostRepository(db *sql.DB) *PostRepository {
@@ -346,4 +348,84 @@ func (r *PostRepository) GetLenAllPost() (int, error) {
 		}
 	}
 	return count, nil
+}
+
+func (r *PostRepository) GetMyPosts(user models.User) ([]models.PostInfo, error) {
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created from posts JOIN users ON users.Id = posts.UserId WHERE users.Id=?", user.ID)
+	if err != nil {
+		return []models.PostInfo{}, fmt.Errorf("repository : get all posts : %w", err)
+	}
+	var posts []models.PostInfo
+	for rows.Next() {
+		p := models.PostInfo{}
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created)
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.PostInfo{}, errors.New("No posts")
+		} else if err != nil {
+			return []models.PostInfo{}, err
+		}
+		categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &p.ID)
+		for categories_rows.Next() {
+			category := ""
+			categories_rows.Scan(&category)
+			p.Categories = append(p.Categories, category)
+		}
+		likes := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=1 AND PostId=?", p.ID)
+		countlike := 0
+		err = likes.Scan(&countlike)
+		if err != nil {
+			return []models.PostInfo{}, fmt.Errorf("GetAllposts : GetAllLikesByPostId : %w", err)
+		}
+
+		dislikes := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=-1 AND PostId=?", p.ID)
+		countdislike := 0
+		err = dislikes.Scan(&countdislike)
+		if err != nil {
+			return []models.PostInfo{}, fmt.Errorf("GetAllposts : GetAllLikesByPostId : %w", err)
+		}
+		p.Likes = countlike
+		p.Dislikes = countdislike
+		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
+func (r *PostRepository) GetMyLikedPosts(user models.User) ([]models.PostInfo, error) {
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created FROM posts JOIN users ON posts.UserId=users.Id  JOIN posts_like ON posts_like.PostId=posts.Id WHERE users.Id=? AND posts_like.Status=1", user.ID)
+	if err != nil {
+		return []models.PostInfo{}, fmt.Errorf("repository : get all posts : %w", err)
+	}
+	var posts []models.PostInfo
+	for rows.Next() {
+		p := models.PostInfo{}
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created)
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.PostInfo{}, errors.New("No posts")
+		} else if err != nil {
+			return []models.PostInfo{}, err
+		}
+		categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &p.ID)
+		for categories_rows.Next() {
+			category := ""
+			categories_rows.Scan(&category)
+			p.Categories = append(p.Categories, category)
+		}
+		likes := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=1 AND PostId=?", p.ID)
+		countlike := 0
+		err = likes.Scan(&countlike)
+		if err != nil {
+			return []models.PostInfo{}, fmt.Errorf("GetAllposts : GetAllLikesByPostId : %w", err)
+		}
+
+		dislikes := r.db.QueryRow("SELECT COUNT(*) FROM posts_like WHERE Status=-1 AND PostId=?", p.ID)
+		countdislike := 0
+		err = dislikes.Scan(&countdislike)
+		if err != nil {
+			return []models.PostInfo{}, fmt.Errorf("GetAllposts : GetAllLikesByPostId : %w", err)
+		}
+		p.Likes = countlike
+		p.Dislikes = countdislike
+		posts = append(posts, p)
+	}
+	return posts, nil
 }

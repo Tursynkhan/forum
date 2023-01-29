@@ -33,7 +33,7 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		posts, err = h.services.GetPostByFilter(r.URL.Query())
+		posts, err = h.services.GetPostByFilter(r.URL.Query(), user)
 		if err != nil {
 			log.Println("home page : GetPostByFilter : ", err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
