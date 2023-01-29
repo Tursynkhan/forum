@@ -35,21 +35,13 @@
     </header>
     <main class="container-main">
         <div class="nav-bar">
-            <div class="categories">
-                <form id="form"  action="/?tag=" method="GET">
-                    <select name="select">
-                        {{range .Category}}
-                        <option  onclick="submit()" value="{{.Name}}">{{.Name}}</option>
-                        {{end}}
-                    </select>
-                </form>
-                <script>
-                    function submit() {
-                        let form = document.getElementById("form");
-                        form.submit();
-                        alert("Data stored in database!");
-                    }
-                </script>
+            <div class="dropdown">
+                <button  onclick="myFunction()" class="dropbtn">Categories</button>
+                <div id="myDropdown" class="dropdown-content">
+                    {{range .Category}}
+                    <a href="/?tag={{.ID}}">{{.Name}}</a>
+                    {{end}}
+                </div>
             </div>
             <div class="right-navbar">
                 <div class="filters">
@@ -111,5 +103,23 @@
        </div>
     </main>
     <footer class="footer"></footer>
+    <script>
+        function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+            }
+        }
+        } 
+    </script>
 </body>
 </html>

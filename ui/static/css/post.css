@@ -7,7 +7,6 @@
 body{
     max-height: 100%;
     margin: 0 auto;
-    background-color: #e8f4f7;
 }
 a{
     text-decoration: none;
@@ -91,6 +90,7 @@ a{
     margin-bottom: 20px;
 }
 .post-title{
+    color: #3b6091;
     font-size: 18px;
     font-weight: 600   ;
 }

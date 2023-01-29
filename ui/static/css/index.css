@@ -7,7 +7,6 @@
 body{
     max-height: 100%;
     margin: 0 auto;
-    background-color: white;
 }
 a{
     text-decoration: none;
@@ -67,13 +66,41 @@ a{
     color:#E0EBF5;
     cursor: pointer;
 }
-.categories select{
-    padding: 5px;
+
+.dropbtn{
+    font-size: 16px;
+    padding: 5px 10px;
     background-color:transparent;
     border:1px solid #919191;
     border-radius: 4px;
 }
+.dropbtn:hover, .dropbtn:focus {
+    background-color:#c5e1ff;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 10px;
+}
+.dropdown-content a {
+    font-size: 14px;
+    color: black;
+    padding:5px;
+    text-decoration: none;
+    display: block;
+  }
 
+.dropdown-content {
+    min-width: 140px;
+    display: none;
+    position: absolute;
+    background-color: white;
+    z-index: 1;
+  }
+
+.dropdown-content a:hover {background-color: #ffffa6;}
+
+.show {display:block;}
 .right-navbar{
     align-items:center;
 }
