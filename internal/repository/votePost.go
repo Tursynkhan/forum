@@ -18,6 +18,7 @@ type VotePost interface {
 	UpdateStatusPostLike(status int, postLike models.PostLike) error
 	GetAllLikesByPostId(postId int) (int, error)
 	GetAllDislikesByPostId(postId int) (int, error)
+	GetPostById(post models.PostLike) (models.Post, error)
 }
 
 func NewVotePostRepository(db *sql.DB) *VotePostLikeRepository {
@@ -91,4 +92,18 @@ func (r *VotePostLikeRepository) GetAllDislikesByPostId(postId int) (int, error)
 		}
 	}
 	return count, nil
+}
+
+func (r *VotePostLikeRepository) GetPostById(post models.PostLike) (models.Post, error) {
+	row := r.db.QueryRow("SELECT Id FROM posts WHERE Id=?", post.PostID)
+	var p models.Post
+	err := row.Scan(&p.ID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Post{}, err
+		} else {
+			return models.Post{}, fmt.Errorf("GetPostById : %w", err)
+		}
+	}
+	return p, nil
 }

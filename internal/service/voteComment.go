@@ -8,6 +8,8 @@ import (
 	"forum/internal/repository"
 )
 
+var ErrCommentNotExist = errors.New("Comment does not exist")
+
 type VoteCommentService struct {
 	repo repository.VoteComment
 }
@@ -24,6 +26,13 @@ func NewVoteCommentService(repo repository.VoteComment) *VoteCommentService {
 }
 
 func (s *VoteCommentService) CreateLikeComment(comment models.CommentLike) error {
+	_, err := s.repo.GetCommentById(comment)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrCommentNotExist
+		}
+		return fmt.Errorf("service : CreateLikeComment : %w", err)
+	}
 	status, err := s.repo.GetStatusCommentLike(comment)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -43,6 +52,13 @@ func (s *VoteCommentService) CreateLikeComment(comment models.CommentLike) error
 }
 
 func (s *VoteCommentService) CreateDisLikeComment(comment models.CommentLike) error {
+	_, err := s.repo.GetCommentById(comment)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrCommentNotExist
+		}
+		return fmt.Errorf("service : CreateDisLikeComment : %w", err)
+	}
 	status, err := s.repo.GetStatusCommentLike(comment)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

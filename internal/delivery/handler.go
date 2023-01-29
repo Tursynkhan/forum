@@ -31,7 +31,7 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("/auth/logout", m.chain(h.logout))
 
 	mux.HandleFunc("/create-post", m.chain(h.createPost))
-	mux.HandleFunc("/get-post/", m.chain(h.getPost))
+	mux.HandleFunc("/post/", m.chain(h.getPost))
 	mux.HandleFunc("/post-like/", m.chain(h.postLike))
 	mux.HandleFunc("/post-dislike/", m.chain(h.postDislike))
 

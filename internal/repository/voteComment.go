@@ -18,6 +18,7 @@ type VoteComment interface {
 	CreateDisLikeComment(comment models.CommentLike) error
 	GetCommentLikesByCommentID(id int) (int, error)
 	GetCommentDislikesByCommentID(id int) (int, error)
+	GetCommentById(comment models.CommentLike) (models.Comment, error)
 }
 
 func NewVoteCommentRepository(db *sql.DB) *VoteCommentRepository {
@@ -89,4 +90,18 @@ func (r *VoteCommentRepository) GetCommentDislikesByCommentID(id int) (int, erro
 		}
 	}
 	return likes, nil
+}
+
+func (r *VoteCommentRepository) GetCommentById(comment models.CommentLike) (models.Comment, error) {
+	row := r.db.QueryRow("SELECT comments.Id FROM comments  WHERE comments.Id=?", comment.CommentID)
+	var c models.Comment
+	err := row.Scan(&c.ID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Comment{}, err
+		} else {
+			return models.Comment{}, fmt.Errorf("repository: GetCommentById : %w", err)
+		}
+	}
+	return c, nil
 }

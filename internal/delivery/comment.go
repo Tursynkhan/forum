@@ -1,8 +1,10 @@
 package delivery
 
 import (
+	"errors"
 	"fmt"
 	"forum/internal/models"
+	"forum/internal/service"
 	"log"
 	"net/http"
 	"strconv"
@@ -39,11 +41,16 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 		PostID:  postId,
 	}
 	if err := h.services.CreateComment(newComment); err != nil {
+		log.Println(err)
+		if errors.Is(err, service.ErrPostNotexist) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
 		h.errorHandler(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	Idpost := strconv.Itoa(postId)
-	http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+	http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 }
 
 func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
@@ -74,11 +81,15 @@ func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.services.CreateLikeComment(newCommentLike); err != nil {
 		log.Printf("Comment: CommentLike: %v\n", err)
+		if errors.Is(err, service.ErrCommentNotExist) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/get-post/%d", comment.PostID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
 }
 
 func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
@@ -109,8 +120,12 @@ func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.services.CreateDisLikeComment(newCommentLike); err != nil {
 		log.Printf("Comment: CommentDislike: %v\n", err)
+		if errors.Is(err, service.ErrCommentNotExist) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	http.Redirect(w, r, fmt.Sprintf("/get-post/%d", comment.PostID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
 }

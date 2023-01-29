@@ -132,7 +132,7 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodGet:
 		user := r.Context().Value(key).(models.User)
-		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
+		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/"))
 		if err != nil {
 			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 			return
@@ -234,11 +234,15 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 		}
 		if err := h.services.CreateLikePost(newPostLike); err != nil {
 			log.Printf("Post: CreateLikePost: %v\n", err)
+			if errors.Is(err, service.ErrPostNotexist) {
+				h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+				return
+			}
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+		http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 	default:
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
@@ -270,11 +274,15 @@ func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
 		}
 		if err := h.services.CreateDisLikePost(newPostLike); err != nil {
 			log.Printf("Post: CreateLikePost: %v\n", err)
+			if errors.Is(err, service.ErrPostNotexist) {
+				h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+				return
+			}
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
+		http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 	default:
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return

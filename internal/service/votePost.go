@@ -24,6 +24,13 @@ func NewVotePostService(repo repository.VotePost) *VotePostService {
 }
 
 func (s *VotePostService) CreateLikePost(postLike models.PostLike) error {
+	_, err := s.repo.GetPostById(postLike)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrPostNotexist
+		}
+		return fmt.Errorf("service: CreateLikePost: %w", err)
+	}
 	status, err := s.repo.GetStatusPostLike(postLike)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -44,6 +51,13 @@ func (s *VotePostService) CreateLikePost(postLike models.PostLike) error {
 }
 
 func (s *VotePostService) CreateDisLikePost(postLike models.PostLike) error {
+	_, err := s.repo.GetPostById(postLike)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrPostNotexist
+		}
+		return fmt.Errorf("service : CreateDislikePost: %w", err)
+	}
 	status, err := s.repo.GetStatusPostLike(postLike)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

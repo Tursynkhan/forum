@@ -16,6 +16,7 @@ type (
 		CreateComment(comment models.Comment) error
 		GetAllComments(postId int) ([]models.Comment, error)
 		GetCommentById(id int) (models.Comment, error)
+		GetPostById(post models.Comment) (models.Post, error)
 	}
 )
 
@@ -62,4 +63,18 @@ func (r *CommentRepository) GetCommentById(id int) (models.Comment, error) {
 		}
 	}
 	return c, nil
+}
+
+func (r *CommentRepository) GetPostById(post models.Comment) (models.Post, error) {
+	row := r.db.QueryRow("SELECT Id,Title,Content,UserId,Created FROM posts WHERE Id=?", post.PostID)
+	var p models.Post
+	err := row.Scan(&p.ID, &p.Title, &p.Content, &p.UserID, &p.Created)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Post{}, err
+		} else {
+			return models.Post{}, fmt.Errorf("repository: GetLenAllPost : %w", err)
+		}
+	}
+	return p, nil
 }
