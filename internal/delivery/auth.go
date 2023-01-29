@@ -25,7 +25,9 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-	if r.Method == "GET" {
+	switch r.Method {
+
+	case http.MethodGet:
 		Form := NewForm{
 			Form: *forms.New(nil),
 		}
@@ -34,7 +36,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-	} else if r.Method == "POST" {
+	case http.MethodPost:
 
 		err := r.ParseForm()
 		if err != nil {
@@ -117,10 +119,11 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		http.Redirect(w, r, "/auth/signin", http.StatusSeeOther)
-	} else {
+	default:
 		log.Println("Sign Up: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
+
 	}
 }
 
@@ -130,7 +133,9 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-	if r.Method == "GET" {
+	switch r.Method {
+
+	case http.MethodGet:
 		Form := NewForm{
 			Form: *forms.New(nil),
 		}
@@ -139,7 +144,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-	} else if r.Method == "POST" {
+	case http.MethodPost:
 		err := r.ParseForm()
 		if err != nil {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
@@ -160,6 +165,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Sign In: Generate Token:%v", err)
 			if errors.Is(err, service.ErrUserNotFound) {
+				w.WriteHeader(http.StatusBadRequest)
 				form.Errors.Add("generic", "Username doesn't exist or Password is incorrect")
 				Form := NewForm{
 					Form: *form,
@@ -181,7 +187,7 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 			Path:    "/",
 		})
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
+	default:
 		log.Println("Sign Up: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
@@ -199,7 +205,8 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
-	if r.Method == "GET" {
+	switch r.Method {
+	case http.MethodGet:
 		var err error
 		token, err := r.Cookie("token")
 		if err != nil {
@@ -222,7 +229,7 @@ func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, c)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
+	default:
 		log.Println("Logout : Method Not Allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return

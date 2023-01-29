@@ -29,9 +29,9 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
+	switch r.Method {
 
-	if r.Method == "GET" {
-
+	case http.MethodGet:
 		categories, err := h.services.GetAllCategories()
 		if err != nil {
 			log.Println("home page : get all categories", err)
@@ -47,7 +47,7 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-	} else if r.Method == "POST" {
+	case http.MethodPost:
 		err := r.ParseForm()
 		if err != nil {
 			log.Println("error parse form :", err)
@@ -79,7 +79,6 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			form := forms.New(r.PostForm)
 			form.Required("title", "content", "categories")
-			w.WriteHeader(http.StatusBadRequest)
 			log.Printf("Post: Create Post: %v\n", err)
 			if errors.Is(err, service.ErrPostTitleLen) {
 				form.MaxLength("title", 100)
@@ -120,15 +119,18 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
+	default:
 		log.Println("Create Post: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
+
 	}
 }
 
 func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
+	switch r.Method {
+
+	case http.MethodGet:
 		user := r.Context().Value(key).(models.User)
 		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/get-post/"))
 		if err != nil {
@@ -205,9 +207,10 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-	} else {
+	default:
 		log.Println("Get Post: Method not allowed")
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+
 	}
 }
 
@@ -217,7 +220,8 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	if r.Method == "POST" {
+	switch r.Method {
+	case http.MethodPost:
 		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-like/"))
 		if err != nil {
 			h.errorHandler(w, http.StatusNotFound, err.Error())
@@ -235,7 +239,7 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 		}
 		Idpost := strconv.Itoa(id)
 		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
-	} else {
+	default:
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
@@ -247,7 +251,8 @@ func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	if r.Method == "POST" {
+	switch r.Method {
+	case http.MethodPost:
 		user, ok := r.Context().Value(key).(models.User)
 		if !ok {
 			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
@@ -270,7 +275,7 @@ func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
 		}
 		Idpost := strconv.Itoa(id)
 		http.Redirect(w, r, "/get-post/"+Idpost, http.StatusSeeOther)
-	} else {
+	default:
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
