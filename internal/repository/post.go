@@ -21,7 +21,7 @@ type Post interface {
 	GetPostsByLeastLikes() ([]models.PostInfo, error)
 	GetPostsByNewest() ([]models.PostInfo, error)
 	GetPostsByOldest() ([]models.PostInfo, error)
-	GetPostByCategory(category string) ([]models.PostInfo, error)
+	GetPostByCategory(categoryId int) ([]models.PostInfo, error)
 	GetLenAllPost() (int, error)
 	GetMyPosts(user models.User) ([]models.PostInfo, error)
 	GetMyLikedPosts(user models.User) ([]models.PostInfo, error)
@@ -215,8 +215,8 @@ func (r *PostRepository) GetPostsByLeastLikes() ([]models.PostInfo, error) {
 	return posts, nil
 }
 
-func (r *PostRepository) GetPostByCategory(category string) ([]models.PostInfo, error) {
-	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created FROM posts INNER JOIN users ON posts.UserId=users.Id INNER JOIN post_categories ON posts.Id=post_categories.PostId INNER JOIN categories ON categories.Id=post_categories.CategoryId WHERE categories.Name=?", category)
+func (r *PostRepository) GetPostByCategory(categoryId int) ([]models.PostInfo, error) {
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created FROM posts INNER JOIN users ON posts.UserId=users.Id INNER JOIN post_categories ON posts.Id=post_categories.PostId INNER JOIN categories ON categories.Id=post_categories.CategoryId WHERE categories.Id=?", categoryId)
 	if err != nil {
 		return []models.PostInfo{}, fmt.Errorf("repository : GetPostByCategory : %w", err)
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
+	"strconv"
 	"strings"
 )
 
@@ -119,9 +120,13 @@ func (s *PostService) GetPostByFilter(query map[string][]string, user models.Use
 					}
 				}
 			}
-		} else if key == "select" {
+		} else if key == "tag" {
 			for _, w := range val {
-				posts, err = s.repo.GetPostByCategory(w)
+				id, err := strconv.Atoi(w)
+				if err != nil {
+					return []models.PostInfo{}, errors.New("service: postfilters: can't convert")
+				}
+				posts, err = s.repo.GetPostByCategory(id)
 				if err != nil {
 					return []models.PostInfo{}, errors.New("post filter service")
 				}
