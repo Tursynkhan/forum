@@ -18,7 +18,7 @@ func Run(cfg *config.Config) {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 	if err := repository.CreateTables(db); err != nil {
-		log.Println(err)
+		log.Fatalf("failed to create tables: %s", err.Error())
 	}
 	defer db.Close()
 	repos := repository.NewRepository(db)
