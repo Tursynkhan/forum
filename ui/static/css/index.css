@@ -107,6 +107,7 @@ a{
 .filters a{
     padding: 5px;
     border-radius: 4px;
+    white-space: nowrap;
 }
 .filters a:hover{
     background-color:rgba(55,94,171,0.6);
@@ -236,4 +237,35 @@ a{
     font-weight: 400;
     font-size: 14px;
     margin-right: 8px;
+}
+@media screen and (max-width:600px) {
+    .nav-bar{
+        flex-wrap: wrap;
+    }
+    .filters{
+        flex-direction: column;
+    }
+    .filters a{
+        white-space: nowrap;
+    }
+    .created-post{
+        display: flex;
+        flex-direction: column;
+    }
+    .liked-post{
+        display: flex;
+        flex-direction: column;
+    }
+}
+  @media screen and (min-width:600px) {
+   
+}
+@media screen and (min-width:768px) {
+    
+}
+  @media screen and (min-width:992px) {
+    
+}
+  @media screen and(min-width:1200px) {
+   
 }

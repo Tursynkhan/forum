@@ -16,6 +16,7 @@ input:valid{
   margin: 0 auto;
   margin-top: 70px;
   padding: 30px;
+  width: 500px;
   max-width: 30%;
   border: 1px solid #919191 ;
 }
@@ -56,4 +57,24 @@ form i {
   position: absolute;
   right: 5%;
   top: 15%;
+}
+@media screen and (max-width:600px) {
+  .container{
+    max-width: 70%;
+  }
+}
+@media screen and (min-width:600px) {
+  .container{
+    max-width: 50%;
+  }
+}
+@media screen and (min-width:992px) {
+  .container{
+    max-width: 40%;
+  }
+}
+@media screen and(min-width:1200px) {
+  .container{
+    max-width: 20%;
+  }
 }

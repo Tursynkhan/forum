@@ -391,7 +391,7 @@ func (r *PostRepository) GetMyPosts(user models.User) ([]models.PostInfo, error)
 }
 
 func (r *PostRepository) GetMyLikedPosts(user models.User) ([]models.PostInfo, error) {
-	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created FROM posts JOIN users ON posts.UserId=users.Id  JOIN posts_like ON posts_like.PostId=posts.Id WHERE users.Id=? AND posts_like.Status=1", user.ID)
+	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created FROM posts JOIN posts_like ON posts_like.PostId=posts.Id JOIN users on users.Id=posts_like.UserId WHERE users.Id=? AND posts_like.Status=1", user.ID)
 	if err != nil {
 		return []models.PostInfo{}, fmt.Errorf("repository : get all posts : %w", err)
 	}
