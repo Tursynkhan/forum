@@ -3,6 +3,7 @@ package delivery
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"forum/internal/forms"
 	"forum/internal/models"
 	"forum/internal/service"
@@ -48,10 +49,10 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case http.MethodPost:
-		err := r.ParseForm()
+		err := r.ParseMultipartForm(20 * 1024 * 1024) // 20 MB
 		if err != nil {
 			log.Println("error parse form :", err)
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			h.errorHandler(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		title, ok := r.Form["title"]
@@ -69,10 +70,19 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusBadRequest, "categories field not found")
 			return
 		}
+
+		files := r.MultipartForm.File["image"]
+		if err != nil {
+			fmt.Println("createPost: file-header: ", err)
+			h.errorHandler(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		newPost := models.Post{
 			UserID:  user.ID,
 			Title:   title[0],
 			Content: content[0],
+			Files:   files,
 			Created: time.Now().Format("2006-01-02 15:04:05"),
 		}
 		postId, err := h.services.Post.CreatePost(newPost)
@@ -89,6 +99,10 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 			} else if errors.Is(err, service.ErrInvalidPost) {
 				form.Required("title", "content")
 				w.WriteHeader(http.StatusBadRequest)
+			} else if errors.Is(err, service.ErrInvalidType) {
+				log.Println(err)
+				h.errorHandler(w, http.StatusBadRequest, err.Error())
+				return
 			} else {
 				log.Println(err)
 				h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -137,20 +151,12 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 			return
 		}
-		lenPost, err := h.services.GetLenAllPost()
-		if err != nil {
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
-		if id > lenPost || id <= 0 {
-			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-			return
-		}
 		post, err := h.services.Post.GetPost(id)
+		fmt.Println(post)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)
 			if errors.Is(err, sql.ErrNoRows) {
-				h.errorHandler(w, http.StatusNotFound, err.Error())
+				h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 				return
 			}
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

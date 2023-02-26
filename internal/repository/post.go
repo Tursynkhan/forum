@@ -22,9 +22,11 @@ type Post interface {
 	GetPostsByNewest() ([]models.PostInfo, error)
 	GetPostsByOldest() ([]models.PostInfo, error)
 	GetPostByCategory(categoryId int) ([]models.PostInfo, error)
-	GetLenAllPost() (int, error)
 	GetMyPosts(user models.User) ([]models.PostInfo, error)
 	GetMyLikedPosts(user models.User) ([]models.PostInfo, error)
+	GetLenAllPost() (int, error)
+	SaveImageForPost(postId int, filePath string) error
+	DeletePostById(postId int) error
 }
 
 func NewPostRepository(db *sql.DB) *PostRepository {
@@ -94,24 +96,29 @@ func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
 }
 
 func (r *PostRepository) GetPost(id int) (models.PostInfo, error) {
-	rows, err := r.db.Query("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created from posts JOIN users ON users.Id = posts.UserId WHERE posts.Id=$1", id)
-	if err != nil {
-		return models.PostInfo{}, fmt.Errorf("repository : get all posts: %w", err)
-	}
+	rows := r.db.QueryRow("SELECT posts.Id, users.Username, posts.Title, posts.Content,posts.UserId,posts.Created from posts JOIN users ON users.Id = posts.UserId WHERE posts.Id=$1", id)
+
 	var post models.PostInfo
-	for rows.Next() {
-		err := rows.Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.UserId, &post.Created)
-		if err == sql.ErrNoRows {
-			return models.PostInfo{}, errors.New("No posts")
-		} else if err != nil {
-			return models.PostInfo{}, err
-		}
-		categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &post.ID)
-		for categories_rows.Next() {
-			category := ""
-			categories_rows.Scan(&category)
-			post.Categories = append(post.Categories, category)
-		}
+	err := rows.Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.UserId, &post.Created)
+	if errors.Is(err, sql.ErrNoRows) {
+		return models.PostInfo{}, err
+	} else if err != nil {
+		return models.PostInfo{}, err
+	}
+	categories_rows, _ := r.db.Query("SELECT categories.Name FROM post_categories JOIN categories ON categories.Id = post_categories.CategoryId WHERE PostId = ?", &post.ID)
+	for categories_rows.Next() {
+		category := ""
+		categories_rows.Scan(&category)
+		post.Categories = append(post.Categories, category)
+	}
+	images_rows, err := r.db.Query("SELECT images.ImageName FROM images JOIN posts ON images.PostId=posts.Id WHERE posts.Id=?", &post.ID)
+	if err != nil {
+		return models.PostInfo{}, fmt.Errorf("repository: GetPost: images: %w", err)
+	}
+	for images_rows.Next() {
+		imageName := ""
+		images_rows.Scan(&imageName)
+		post.Images = append(post.Images, imageName)
 	}
 	return post, nil
 }
@@ -428,4 +435,25 @@ func (r *PostRepository) GetMyLikedPosts(user models.User) ([]models.PostInfo, e
 		posts = append(posts, p)
 	}
 	return posts, nil
+}
+
+func (r *PostRepository) SaveImageForPost(postId int, filePath string) error {
+	stmt, err := r.db.Prepare("INSERT INTO images (ImageName,PostId) VALUES (?,?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(filePath, postId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *PostRepository) DeletePostById(postId int) error {
+	_, err := r.db.Exec("DELETE FROM posts WHERE posts.Id=?", postId)
+	if err != nil {
+		return fmt.Errorf("repository: DeletePostById: %w", err)
+	}
+	return nil
 }

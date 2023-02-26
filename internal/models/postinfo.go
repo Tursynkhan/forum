@@ -7,6 +7,7 @@ type PostInfo struct {
 	Title      string
 	Content    string
 	Created    string
+	Images     []string
 	UserId     int
 	Likes      int
 	Dislikes   int

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
+	"io"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -13,10 +15,10 @@ type Post interface {
 	CreatePost(post models.Post) (int, error)
 	GetAllPosts() ([]models.PostInfo, error)
 	GetPost(id int) (models.PostInfo, error)
+	SaveImageForPost(post models.Post) error
 	CreatePostCategory(id int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
 	GetPostByFilter(query map[string][]string, user models.User) ([]models.PostInfo, error)
-	GetLenAllPost() (int, error)
 }
 
 type PostService struct {
@@ -31,6 +33,7 @@ var (
 	ErrInvalidPost    = errors.New("invalid post")
 	ErrPostTitleLen   = errors.New("title length out of range")
 	ErrPostContentLen = errors.New("content length out of range")
+	ErrInvalidType    = errors.New("The provided file format is not allowed")
 )
 
 func (s *PostService) CreatePost(post models.Post) (int, error) {
@@ -40,7 +43,22 @@ func (s *PostService) CreatePost(post models.Post) (int, error) {
 	if err := checkPost(post); err != nil {
 		return 0, err
 	}
-	return s.repo.CreatePost(post)
+
+	id, err := s.repo.CreatePost(post)
+	if err != nil {
+		return 0, fmt.Errorf("service: createPost: %w", err)
+	}
+	post.ID = id
+	if err := s.SaveImageForPost(post); err != nil {
+		if errors.Is(err, ErrInvalidType) {
+			return 0, err
+		}
+		if err := s.repo.DeletePostById(post.ID); err != nil {
+			return 0, err
+		}
+		return 0, fmt.Errorf("service: SaveImageForPost: %w", err)
+	}
+	return id, nil
 }
 
 func (s *PostService) GetAllPosts() ([]models.PostInfo, error) {
@@ -138,12 +156,36 @@ func (s *PostService) GetPostByFilter(query map[string][]string, user models.Use
 	return posts, nil
 }
 
-func (s *PostService) GetLenAllPost() (int, error) {
-	count, err := s.repo.GetLenAllPost()
-	if err != nil {
-		return 0, fmt.Errorf("service : post : GetLenAllPost %w", err)
+func (s *PostService) SaveImageForPost(post models.Post) error {
+	if err := os.MkdirAll(fmt.Sprintf("./uploades/%d", post.ID), os.ModePerm); err != nil {
+		return err
 	}
-	return count, nil
+	for _, fileHeader := range post.Files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		imageSplit := strings.Split(fileHeader.Filename, ".")
+		if !validImageType(imageSplit[len(imageSplit)-1]) {
+			return ErrInvalidType
+		}
+
+		f, err := os.Create(fmt.Sprintf("./uploades/%d/%s", post.ID, fileHeader.Filename))
+		if err != nil {
+			return err
+		}
+
+		defer f.Close()
+		_, err = io.Copy(f, file)
+		if err != nil {
+			return err
+		}
+		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/uploades/%d/%s", post.ID, fileHeader.Filename)); err != nil {
+			return fmt.Errorf("service : SaveImageForPost : %w", err)
+		}
+	}
+	return nil
 }
 
 func checkPost(post models.Post) error {
@@ -163,6 +205,16 @@ func isInvalidPost(post models.Post) bool {
 	}
 	if strings.ReplaceAll(post.Content, " ", "") == "" {
 		return true
+	}
+	return false
+}
+
+func validImageType(imageType string) bool {
+	validImageType := []string{"jpeg", "jpg", "png", "gif"}
+	for _, t := range validImageType {
+		if t == imageType {
+			return true
+		}
 	}
 	return false
 }

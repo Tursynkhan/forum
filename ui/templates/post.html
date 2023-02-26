@@ -53,6 +53,13 @@
                 {{end}}
             </div>
             <div class="post-content">
+                {{if .Post.Images}}
+                <div class="images">
+                        {{range $i,$value:= .Post.Images}}
+                            <img src="/uploads/5/js.png" alt="img-{{$i}}" width="300" height="300">
+                        {{end}}
+                </div>
+                {{end}}
                 <p>{{.Post.Content}}</p>
             </div>
             <div class="reaction" style="display:flex">
