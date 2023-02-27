@@ -19,6 +19,8 @@ type NewForms struct {
 	Category []models.Category
 }
 
+const MAX_UPLOAD_SIZE = 20 * 1024 * 1024
+
 func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(key).(models.User)
 
@@ -45,14 +47,15 @@ func (h *Handler) createPost(w http.ResponseWriter, r *http.Request) {
 		}
 		if err := h.tmpl.ExecuteTemplate(w, "createPost.html", Form); err != nil {
 			log.Println(err.Error())
-			h.errorHandler(w, http.StatusInternalServerError, err.Error())
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 	case http.MethodPost:
-		err := r.ParseMultipartForm(20 * 1024 * 1024) // 20 MB
+		r.Body = http.MaxBytesReader(w, r.Body, MAX_UPLOAD_SIZE)
+		err := r.ParseMultipartForm(MAX_UPLOAD_SIZE)
 		if err != nil {
 			log.Println("error parse form :", err)
-			h.errorHandler(w, http.StatusBadRequest, err.Error())
+			h.errorHandler(w, http.StatusBadRequest, "The uploaded file is too big.")
 			return
 		}
 		title, ok := r.Form["title"]
@@ -152,7 +155,6 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		post, err := h.services.Post.GetPost(id)
-		fmt.Println(post)
 		if err != nil {
 			log.Printf("Post: getPost: %v", err)
 			if errors.Is(err, sql.ErrNoRows) {

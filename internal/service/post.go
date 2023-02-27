@@ -157,7 +157,7 @@ func (s *PostService) GetPostByFilter(query map[string][]string, user models.Use
 }
 
 func (s *PostService) SaveImageForPost(post models.Post) error {
-	if err := os.MkdirAll(fmt.Sprintf("./uploades/%d", post.ID), os.ModePerm); err != nil {
+	if err := os.MkdirAll(fmt.Sprintf("./ui/static/upload/%d", post.ID), os.ModePerm); err != nil {
 		return err
 	}
 	for _, fileHeader := range post.Files {
@@ -171,7 +171,7 @@ func (s *PostService) SaveImageForPost(post models.Post) error {
 			return ErrInvalidType
 		}
 
-		f, err := os.Create(fmt.Sprintf("./uploades/%d/%s", post.ID, fileHeader.Filename))
+		f, err := os.Create(fmt.Sprintf("./ui/static/upload/%d/%s", post.ID, fileHeader.Filename))
 		if err != nil {
 			return err
 		}
@@ -181,7 +181,7 @@ func (s *PostService) SaveImageForPost(post models.Post) error {
 		if err != nil {
 			return err
 		}
-		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/uploades/%d/%s", post.ID, fileHeader.Filename)); err != nil {
+		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/ui/static/upload/%d/%s", post.ID, fileHeader.Filename)); err != nil {
 			return fmt.Errorf("service : SaveImageForPost : %w", err)
 		}
 	}

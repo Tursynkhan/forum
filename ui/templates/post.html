@@ -56,7 +56,9 @@
                 {{if .Post.Images}}
                 <div class="images">
                         {{range $i,$value:= .Post.Images}}
-                            <img src="/uploads/5/js.png" alt="img-{{$i}}" width="300" height="300">
+                        <div class="image">
+                            <img src="{{$value}}" alt="img-{{$i}}" style="width: 300px;height: 300px;">
+                        </div>
                         {{end}}
                 </div>
                 {{end}}
