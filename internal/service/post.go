@@ -181,7 +181,7 @@ func (s *PostService) SaveImageForPost(post models.Post) error {
 		if err != nil {
 			return err
 		}
-		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/ui/static/upload/%d/%s", post.ID, fileHeader.Filename)); err != nil {
+		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/static/upload/%d/%s", post.ID, fileHeader.Filename)); err != nil {
 			return fmt.Errorf("service : SaveImageForPost : %w", err)
 		}
 	}
