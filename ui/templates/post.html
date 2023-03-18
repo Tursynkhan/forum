@@ -54,15 +54,18 @@
             </div>
             <div class="post-content">
                 {{if .Post.Images}}
-                <div class="images">
-                        {{range $i,$value:= .Post.Images}}
-                        <div class="image">
-                            <img src="{{$value}}" alt="img-{{$i}}" style="width: 300px;height: 300px;">
-                        </div>
-                        {{end}}
+                <div class="image-list">
+                    {{range $i,$value:= .Post.Images}}
+                    <div class="image fade">
+                        <img src="{{$value}}" alt="img-{{$i}}" style="width: 100%;aspect-ratio: 16/9; object-fit: cover;">
+                    </div>
+                    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+                    {{end}}
+                    
                 </div>
                 {{end}}
-                <p>{{.Post.Content}}</p>
+                <p class="post-text">{{.Post.Content}}</p>
             </div>
             <div class="reaction" style="display:flex">
                 <form  action="/post-like/{{.Post.ID}}" method="POST">
@@ -127,5 +130,29 @@
             {{end}}
         </div>
         </div>
+        <script>
+            let slideIndex = 1;
+                showSlides(slideIndex);
+
+                function plusSlides(n) {
+                showSlides(slideIndex += n);
+                }
+
+                function currentSlide(n) {
+                showSlides(slideIndex = n);
+                }
+
+                function showSlides(n) {
+                let i;
+                let slides = document.getElementsByClassName("image");
+                if (n > slides.length) {slideIndex = 1}
+                if (n < 1) {slideIndex = slides.length}
+                for (i = 0; i < slides.length; i++) {
+                    slides[i].style.display = "none";
+                }
+                
+                slides[slideIndex-1].style.display = "block";
+                } 
+        </script>
 </body>
 </html>

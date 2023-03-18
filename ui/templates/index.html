@@ -36,8 +36,8 @@
     <main class="container-main">
         <div class="nav-bar">
             <div class="dropdown">
-                <button  onclick="myFunction()" class="dropbtn">Categories</button>
-                <div id="myDropdown" class="dropdown-content">
+                <button  class="dropbtn">Categories<i class="fas fa-chevron-down"></i></button>
+                <div  class="dropdown-content">
                     {{range .Category}}
                     <a href="/?tag={{.ID}}">{{.Name}}</a>
                     {{end}}
@@ -45,18 +45,17 @@
             </div>
             <div class="right-navbar">
                 <div class="filters">
-                    <div class="created-post">
+                    <button   class="dropbtn">Filter<i class="fas fa-chevron-down"></i></button>
+                    <div class="dropdown-content">
                         <a href="/?time=new">Latest post</a>
                         <a href="/?time=old">Oldest post</a>
+                        {{if .User.Username}}
+                            <a href="/?like=most">Most liked</a>
+                            <a href="/?like=least">Least liked</a>
+                            <a href="/?my=post">My posts</a>
+                            <a href="/?my=like">My liked posts</a>
+                        {{end}}
                     </div>
-                {{if .User.Username}}
-                    <div class="liked-post">
-                        <a href="/?like=most">Most liked</a>
-                        <a href="/?like=least">Least liked</a>
-                        <a href="/?my=post">My posts</a>
-                        <a href="/?my=like">My liked posts</a>
-                    </div>
-                    {{end}}
                 </div>
                 {{if .User.Username}}
                 <div class="create-post">
@@ -104,22 +103,24 @@
     </main>
     <footer class="footer"></footer>
     <script>
-        function myFunction() {
-        document.getElementById("myDropdown").classList.toggle("show");
-        }
+        var dropdownBtns = document.querySelectorAll(".dropbtn");
 
-        window.onclick = function(event) {
-        if (!event.target.matches('.dropbtn')) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
-            var i;
-            for (i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-                openDropdown.classList.remove('show');
-            }
-            }
-        }
-        } 
+            // Loop through the dropdown buttons and add a click event listener to each one
+            dropdownBtns.forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                // Toggle the visibility of the dropdown content
+                this.nextElementSibling.classList.toggle("show");
+            });
+            });
+
+            // Close the dropdown when the user clicks outside of it
+            window.addEventListener("click", function(event) {
+            dropdownBtns.forEach(function(btn) {
+                if (!btn.contains(event.target)) {
+                btn.nextElementSibling.classList.remove("show");
+                }
+            });
+            });
     </script>
 </body>
 </html>

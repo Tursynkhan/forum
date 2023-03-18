@@ -74,6 +74,12 @@ a{
     border:1px solid #919191;
     border-radius: 4px;
 }
+.dropbtn i {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 .dropbtn:hover, .dropbtn:focus {
     background-color:#c5e1ff;
 }
@@ -104,14 +110,6 @@ a{
 .right-navbar{
     align-items:center;
 }
-.filters a{
-    padding: 5px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-.filters a:hover{
-    background-color:rgba(55,94,171,0.6);
-}
 .create-post{
     border-radius: 2px;
     padding: 5px;
@@ -136,9 +134,7 @@ a{
 .nav-bar{
     display: flex;
 }
-.created-post{
-    margin-right: 10px;
-}
+
 .nav-bar form{
     margin-right: 10px;
 }
@@ -147,9 +143,7 @@ a{
     justify-content: space-between;
     width: 100%;
 }
-.filters{
-    display: flex;
-}
+
 .create-post{
     display: flex;
     justify-content: flex-end;
@@ -247,10 +241,6 @@ a{
     }
     .filters a{
         white-space: nowrap;
-    }
-    .created-post{
-        display: flex;
-        flex-direction: column;
     }
     .liked-post{
         display: flex;
