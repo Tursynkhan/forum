@@ -69,10 +69,11 @@ a{
 
 .dropbtn{
     font-size: 16px;
-    padding: 5px 10px;
+    padding: 5px 5px;
     background-color:transparent;
     border:1px solid #919191;
     border-radius: 4px;
+    width: max-content;
 }
 .dropbtn i {
     position: absolute;
@@ -87,6 +88,7 @@ a{
   position: relative;
   display: inline-block;
   margin-right: 10px;
+  margin-bottom: 5px;
 }
 .dropdown-content a {
     font-size: 14px;
@@ -104,7 +106,21 @@ a{
     z-index: 1;
   }
 
-.dropdown-content a:hover {background-color: #ffffa6;}
+.dropdown-content a:hover {
+    background-color: #ffffa6;
+}
+
+.dropbtn::after {
+    content: "";
+    display: inline-block;
+    margin-left: 5px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid black;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    vertical-align: middle;
+  }
 
 .show {display:block;}
 .right-navbar{
@@ -142,6 +158,7 @@ a{
     display: flex;
     justify-content: space-between;
     width: 100%;
+    margin-bottom: 5px;
 }
 
 .create-post{
