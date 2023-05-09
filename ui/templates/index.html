@@ -16,11 +16,35 @@
             </a>
             <div class="auth">
                 {{if .User.Username}}
-                    <div  class="username">{{.User.Username}}</div>
-                    <div class="log-out">
-                        <form action="/auth/logout" method="GET">
-                            <button class="logout">Logout</button>
-                        </form>
+                <button onclick="showModal('notification')" class="notify"></button>
+                <div id="notification" class="modal" onclick="closeModal('notification');">
+                    <div class="modal-content">
+                        <div class="modal-header">Notifications<span class='close' onclick='closeModal("notification")'></span></div>
+                        <div class="modal-body">
+                                <span><a href="#"></a>  <a href="#"></a></span>
+                                <span>No notifications for you</span>
+                        </div>
+                    </div>
+                </div>
+                    <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
+                    <div class="sub-menu-wrap" id="subMenu">
+                        <div class="sub-menu">
+                            <div class="user-info">
+                                <img src="../static/img/account.png" alt="">
+                                <h2>{{.User.Username}}</h2>
+                            </div>
+                            <hr>
+                            <a href="/profile/{{.User.Username}}" class="sub-menu-link">
+                                <img src="../static/img/user.png" alt="profile">
+                                <p>Profile</p>
+                                <span>></span>
+                            </a>
+                            <a href="/auth/logout" class="sub-menu-link">
+                                <img src="../static/img/logout.png" alt="logout">
+                                <p>LogOut</p>
+                                <span>></span>
+                            </a>
+                        </div>
                     </div>
                 {{else}}
                 <div class="sign">
@@ -103,6 +127,10 @@
     </main>
     <footer class="footer"></footer>
     <script>
+        let submenu=document.getElementById("subMenu");
+        function togglemenu(){
+            submenu.classList.toggle("open-menu");
+        }
         var dropdownBtns = document.querySelectorAll(".dropbtn");
 
             // Loop through the dropdown buttons and add a click event listener to each one
@@ -120,6 +148,22 @@
                 btn.nextElementSibling.classList.remove("show");
                 }
             });
+            });
+            function showModal(id) {
+                // document.querySelector('.modal').style.display = 'flex'
+                document.getElementById(id).style.display = 'flex'
+            }
+
+            function closeModal(id) {
+                // document.querySelector('.modal').style.display = 'none'
+                document.getElementById(id).style.display = 'none'
+
+            }
+            
+            const modals = document.querySelectorAll(".modal-content")
+
+            modals.forEach(element => {
+                element.addEventListener("click", (e) => { e.stopPropagation() })
             });
     </script>
 </body>
