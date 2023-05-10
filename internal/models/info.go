@@ -2,6 +2,7 @@ package models
 
 type Info struct {
 	User        User
+	ProfileUser ProfileUser
 	Post        PostInfo
 	Posts       []PostInfo
 	Comments    []Comment
