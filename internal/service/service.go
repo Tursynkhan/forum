@@ -10,6 +10,7 @@ type Service struct {
 	Comment
 	VotePost
 	VoteComment
+	User
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -19,5 +20,6 @@ func NewService(repos *repository.Repository) *Service {
 		Comment:      NewCommentService(repos.Comment),
 		VotePost:     NewVotePostService(repos.VotePost),
 		VoteComment:  NewVoteCommentService(repos.VoteComment),
+		User:         NewUserService(repos.User),
 	}
 }
