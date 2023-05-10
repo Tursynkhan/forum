@@ -29,7 +29,7 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("/auth/signup", m.chain(h.signUp))
 	mux.HandleFunc("/auth/signin", m.chain(h.signIn))
 	mux.HandleFunc("/auth/logout", m.chain(h.logout))
-	mux.HandleFunc("/profile", m.chain(h.profilePage))
+	mux.HandleFunc("/profile/", m.chain(h.profilePage))
 
 	mux.HandleFunc("/create-post", m.chain(h.createPost))
 	mux.HandleFunc("/post/", m.chain(h.getPost))
