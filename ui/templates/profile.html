@@ -4,9 +4,117 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <link rel="stylesheet" href="../static/css/profile.css">
+    <title>Profile | Forum</title>
 </head>
 <body>
-    
+    <header class="header">
+        <div class="header-container">
+            <a href="/" class="header-title">
+                <img src="https://forum.golangbridge.org/uploads/default/original/2X/b/b7c7c811a309cce5ab951588d4302faaa96553b5.png" alt="logo" style="width: 120px;height: 40px;">
+            </a>
+            <div class="auth">
+                {{if .User.Username}}
+                <button onclick="showModal('notification')" class="notify"></button>
+                <div id="notification" class="modal" onclick="closeModal('notification');">
+                    <div class="modal-content">
+                        <div class="modal-header">Notifications<span class='close' onclick='closeModal("notification")'></span></div>
+                        <div class="modal-body">
+                                <span><a href="#"></a>  <a href="#"></a></span>
+                                <span>No notifications for you</span>
+                        </div>
+                    </div>
+                </div>
+                    <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
+                    <div class="sub-menu-wrap" id="subMenu">
+                        <div class="sub-menu">
+                            <div class="user-info">
+                                <img src="../static/img/account.png" alt="">
+                                <h2>{{.User.Username}}</h2>
+                            </div>
+                            <hr>
+                            <a href="/profile/{{.User.Username}}" class="sub-menu-link">
+                                <img src="../static/img/user.png" alt="profile">
+                                <p>Profile</p>
+                                <span>></span>
+                            </a>
+                            <a href="/auth/logout" class="sub-menu-link">
+                                <img src="../static/img/logout.png" alt="logout">
+                                <p>LogOut</p>
+                                <span>></span>
+                            </a>
+                        </div>
+                    </div>
+                {{else}}
+                <div class="sign">
+                    <a href="/auth/signup">Sign Up</a>
+                </div>
+                <div class="sign">
+                    <a href="/auth/signin">Log in</a>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </header>
+    <main class="container-main">
+        <div class="container-about">
+            <div class="profile-img">
+                <img src="../static/img/account.png" alt="profile-img" class="account">
+            </div>
+            <div class="description-about">
+                <p class="profile-username">{{.User.Username}}</p>
+                <p class="profile-email">{{User.Email}}</p>
+                <div class="info-panel">
+                    <div class="count">
+                        <img src="../static/img/edit.png" alt="post" class="panel-img"><span class="count-of-number">3</span>
+                    </div>
+                    <div class="count">
+                        <img src="../static/img/thumb-up.png" alt="like" class="panel-img"><span class="count-of-number">4</span>
+                    </div>
+                    <div class="count">
+                        <img src="../static/img/comment.png" alt="comment" class="panel-img"><span class="count-of-number">5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+        <div class="main-body">
+            <div class="filter-posts">
+                <a href="/profile/?posts=created" class="filter">Created Posts</a>
+                <a href="/profile/?posts=liked" class="filter">Liked Posts</a>
+                <a href="/profile/?posts=commented" class="filter">Commented Posts</a>
+            </div>
+            {{range .Posts}}
+            <div class="post-item">
+                <a href="/post/{{.ID}}">
+                <div class="post-item-header">
+                    <div class="post-author">
+                        by: {{.Author}}
+                    </div>
+                    <div class="time">
+                        {{.Created}}
+                    </div>
+                </div>
+                <div class="post-title">
+                        {{.Title}}
+                    </div>
+                    <div class="categories">
+                        {{range .Categories}}
+                        <div class="category">
+                            {{.}}
+                        </div>
+                        {{end}}
+                    </div>
+                </a>
+                <div class="like-post">
+                    <span class="like"><img src="../static/img/up.png" alt="like"></span>
+                    <span class="count">{{.Likes}}</span>
+                    <span class="dislike"><img src="../static/img/down.png" alt=""></span>
+                    <span class="count">{{.Dislikes}}</span>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </main>
 </body>
 </html>
