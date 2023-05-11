@@ -63,16 +63,16 @@
             </div>
             <div class="description-about">
                 <p class="profile-username">{{.User.Username}}</p>
-                <p class="profile-email">{{User.Email}}</p>
+                <p class="profile-email">{{.ProfileUser.Email}}</p>
                 <div class="info-panel">
                     <div class="count">
-                        <img src="../static/img/edit.png" alt="post" class="panel-img"><span class="count-of-number">3</span>
+                        <img src="../static/img/edit.png" alt="post" class="panel-img"><span class="count-of-number">{{.ProfileUser.CountOfPosts }}</span>
                     </div>
                     <div class="count">
-                        <img src="../static/img/thumb-up.png" alt="like" class="panel-img"><span class="count-of-number">4</span>
+                        <img src="../static/img/thumb-up.png" alt="like" class="panel-img"><span class="count-of-number">{{.ProfileUser.CountOfLikes}}</span>
                     </div>
                     <div class="count">
-                        <img src="../static/img/comment.png" alt="comment" class="panel-img"><span class="count-of-number">5</span>
+                        <img src="../static/img/comment.png" alt="comment" class="panel-img"><span class="count-of-number">{{.ProfileUser.CountOfComments}}</span>
                     </div>
                 </div>
             </div>
@@ -80,9 +80,9 @@
       
         <div class="main-body">
             <div class="filter-posts">
-                <a href="/profile/?posts=created" class="filter">Created Posts</a>
-                <a href="/profile/?posts=liked" class="filter">Liked Posts</a>
-                <a href="/profile/?posts=commented" class="filter">Commented Posts</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=created" class="filter">Created Posts</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=liked" class="filter">Liked Posts</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=commented" class="filter">Commented Posts</a>
             </div>
             {{range .Posts}}
             <div class="post-item">
