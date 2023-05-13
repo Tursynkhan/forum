@@ -11,6 +11,7 @@ type Service struct {
 	VotePost
 	VoteComment
 	User
+	Notification
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -21,5 +22,6 @@ func NewService(repos *repository.Repository) *Service {
 		VotePost:     NewVotePostService(repos.VotePost),
 		VoteComment:  NewVoteCommentService(repos.VoteComment),
 		User:         NewUserService(repos.User),
+		Notification: NewNotificationService(repos.Notification),
 	}
 }
