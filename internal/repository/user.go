@@ -145,7 +145,7 @@ func (r *UserRepository) GetCommentedPostByUsername(username string) ([]models.P
 func (r *UserRepository) GetProfileByUsername(username string) (models.ProfileUser, error) {
 	row := r.db.QueryRow("SELECT username,email,(SELECT count(*) FROM posts JOIN posts_like ON posts_like.PostId=posts.Id JOIN users on users.Id=posts_like.UserId WHERE users.Username=? AND posts_like.Status=1) as countoflikedpost,(SELECT COUNT(*) from posts JOIN users ON users.Id = posts.UserId Where users.Username=?) as countofpost,(SELECT count(*) FROM posts JOIN comments ON comments.PostId=posts.Id JOIN users on users.Id=comments.UserId WHERE users.Username=?) as countofcomment from users WHERE username=?", username, username, username, username)
 	var user models.ProfileUser
-	err := row.Scan(&user.Username, &user.Email, &user.CountOfComments, &user.CountOfLikes, &user.CountOfPosts)
+	err := row.Scan(&user.Username, &user.Email, &user.CountOfLikes, &user.CountOfPosts, &user.CountOfComments)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.ProfileUser{}, fmt.Errorf("user : GetUuserByUsername : %w", err)

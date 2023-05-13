@@ -11,6 +11,7 @@ type Repository struct {
 	VotePost
 	VoteComment
 	User
+	Notification
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -21,5 +22,6 @@ func NewRepository(db *sql.DB) *Repository {
 		VotePost:     NewVotePostRepository(db),
 		VoteComment:  NewVoteCommentRepository(db),
 		User:         NewUserRepository(db),
+		Notification: NewNotificationRepository(db),
 	}
 }

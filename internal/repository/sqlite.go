@@ -78,6 +78,16 @@ const (
 			PostId INTEGER,
 			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
 			);`
+	notificationTable = `CREATE TABLE IF NOT EXISTS notifications(
+			Id INTEGER PRIMARY KEY AUTOINCREMENT,
+			FromUser TEXT,
+			ToUser TEXT,
+			Content TEXT,
+			PostId INTEGER,
+			TimeStamp TEXT,
+			IsRead INTEGER,
+			FOREIGN KEY (PostId) REFERENCES posts (Id) ON DELETE CASCADE
+			);`
 	insertCategories = `INSERT OR IGNORE INTO categories(Name) VALUES
 			('Getting Help'),
 			('Releases'),
@@ -101,7 +111,7 @@ func InitDB(cfg Config) (*sql.DB, error) {
 }
 
 func CreateTables(db *sql.DB) error {
-	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable, insertCategories, sessionTable,imageTable}
+	allTables := []string{usertable, postTable, commentTable, categoryTable, postCategoryTable, postLikeTable, commentLikeTable, insertCategories, sessionTable, imageTable}
 	for _, table := range allTables {
 		_, err := db.Exec(table)
 		if err != nil {
