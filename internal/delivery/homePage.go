@@ -40,6 +40,11 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// notifications, err := h.services.GetAllNotification(user)
+	// if err != nil {
+	// 	h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+	// 	return
+	// }
 	info := models.Info{
 		Posts:    posts,
 		User:     user,

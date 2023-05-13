@@ -228,33 +228,55 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	switch r.Method {
-	case http.MethodPost:
-		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-like/"))
-		if err != nil {
-			h.errorHandler(w, http.StatusNotFound, err.Error())
-			return
-		}
-		newPostLike := models.PostLike{
-			UserID: user.ID,
-			PostID: id,
-			Status: 1,
-		}
-		if err := h.services.CreateLikePost(newPostLike); err != nil {
-			log.Printf("Post: CreateLikePost: %v\n", err)
-			if errors.Is(err, service.ErrPostNotexist) {
-				h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-				return
-			}
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
-		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
-	default:
+	if r.Method != http.MethodPost {
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
+
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-like/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	newPostLike := models.PostLike{
+		UserID: user.ID,
+		PostID: id,
+		Status: 1,
+	}
+	post, err := h.services.Post.GetPost(id)
+	if err != nil {
+		log.Printf("Post: getPost: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	if err := h.services.CreateLikePost(newPostLike); err != nil {
+		log.Printf("Post: CreateLikePost: %v\n", err)
+		if errors.Is(err, service.ErrPostNotexist) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	if post.Author != user.Username {
+		newNotification := models.Notification{
+			From:      user.Username,
+			To:        post.Author,
+			Content:   "liked your post",
+			PostId:    post.ID,
+			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+		}
+		if err := h.services.AddNewNotification(newNotification); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	}
+	Idpost := strconv.Itoa(id)
+	http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 }
 
 func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
