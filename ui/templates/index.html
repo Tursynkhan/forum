@@ -21,8 +21,11 @@
                     <div class="modal-content">
                         <div class="modal-header">Notifications<span class='close' onclick='closeModal("notification")'></span></div>
                         <div class="modal-body">
-                                <span><a href="#"></a>  <a href="#"></a></span>
+                                {{range .Notifications}}
+                                <span><a href="/profile/{{.From}}">{{.From}}</a> {{.Content}}<a href="/post/{{.PostId}}">{{.PostId}}</a></span>
+                                {{else}}
                                 <span>No notifications for you</span>
+                                {{end}}
                         </div>
                     </div>
                 </div>
@@ -76,8 +79,6 @@
                         {{if .User.Username}}
                             <a href="/?like=most">Most liked</a>
                             <a href="/?like=least">Least liked</a>
-                            <a href="/?my=post">My posts</a>
-                            <a href="/?my=like">My liked posts</a>
                         {{end}}
                     </div>
                 </div>
@@ -126,45 +127,6 @@
        </div>
     </main>
     <footer class="footer"></footer>
-    <script>
-        let submenu=document.getElementById("subMenu");
-        function togglemenu(){
-            submenu.classList.toggle("open-menu");
-        }
-        var dropdownBtns = document.querySelectorAll(".dropbtn");
-
-            // Loop through the dropdown buttons and add a click event listener to each one
-            dropdownBtns.forEach(function(btn) {
-            btn.addEventListener("click", function() {
-                // Toggle the visibility of the dropdown content
-                this.nextElementSibling.classList.toggle("show");
-            });
-            });
-
-            // Close the dropdown when the user clicks outside of it
-            window.addEventListener("click", function(event) {
-            dropdownBtns.forEach(function(btn) {
-                if (!btn.contains(event.target)) {
-                btn.nextElementSibling.classList.remove("show");
-                }
-            });
-            });
-            function showModal(id) {
-                // document.querySelector('.modal').style.display = 'flex'
-                document.getElementById(id).style.display = 'flex'
-            }
-
-            function closeModal(id) {
-                // document.querySelector('.modal').style.display = 'none'
-                document.getElementById(id).style.display = 'none'
-
-            }
-            
-            const modals = document.querySelectorAll(".modal-content")
-
-            modals.forEach(element => {
-                element.addEventListener("click", (e) => { e.stopPropagation() })
-            });
-    </script>
+    <script src="../static/script/header.js"></script>
 </body>
 </html>
