@@ -29,6 +29,7 @@ func (r *CommentRepository) CreateComment(comment models.Comment) error {
 	if err != nil {
 		return fmt.Errorf("commentary : create comment : %w", err)
 	}
+
 	return nil
 }
 
@@ -52,9 +53,9 @@ func (r *CommentRepository) GetAllComments(postId int) ([]models.Comment, error)
 }
 
 func (r *CommentRepository) GetCommentById(id int) (models.Comment, error) {
-	row := r.db.QueryRow("SELECT Id,Content,UserId,PostId FROM comments  WHERE Id=?", id)
+	row := r.db.QueryRow("SELECT comments.Id,comments.Content,comments.UserId,comments.PostId,users.Username FROM comments JOIN users ON users.Id=comments.UserId  WHERE comments.Id=?", id)
 	c := models.Comment{}
-	err := row.Scan(&c.ID, &c.Content, &c.UserID, &c.PostID)
+	err := row.Scan(&c.ID, &c.Content, &c.UserID, &c.PostID, &c.Author)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.Comment{}, err
