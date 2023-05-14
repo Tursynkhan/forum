@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"forum/internal/models"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +37,17 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
+	post, err := h.services.Post.GetPost(postId)
+	if err != nil {
+		log.Printf("Post: getPost: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+
 	newComment := models.Comment{
 		Content: comment[0],
 		UserID:  user.ID,
@@ -48,6 +61,21 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 		}
 		h.errorHandler(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	if post.Author != user.Username {
+		newNotification := models.Notification{
+			From:      user.Username,
+			To:        post.Author,
+			Content:   "commented your post",
+			PostId:    post.ID,
+			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+			IsRead:    0,
+		}
+		if err := h.services.AddNewNotification(newNotification); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 	}
 	Idpost := strconv.Itoa(postId)
 	http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
@@ -88,7 +116,20 @@ func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-
+	if comment.Author != user.Username {
+		newNotification := models.Notification{
+			From:      user.Username,
+			To:        comment.Author,
+			Content:   "liked comment under the post",
+			PostId:    comment.PostID,
+			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+			IsRead:    0,
+		}
+		if err := h.services.AddNewNotification(newNotification); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	}
 	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
 }
 
@@ -126,6 +167,20 @@ func (h *Handler) commentDislike(w http.ResponseWriter, r *http.Request) {
 		}
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
+	}
+	if comment.Author != user.Username {
+		newNotification := models.Notification{
+			From:      user.Username,
+			To:        comment.Author,
+			Content:   "disliked comment under the post",
+			PostId:    comment.PostID,
+			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+			IsRead:    0,
+		}
+		if err := h.services.AddNewNotification(newNotification); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 	}
 	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
 }

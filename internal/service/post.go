@@ -124,20 +124,6 @@ func (s *PostService) GetPostByFilter(query map[string][]string, user models.Use
 					}
 				}
 			}
-		} else if key == "my" {
-			for _, w := range val {
-				if w == "post" {
-					posts, err = s.repo.GetMyPosts(user)
-					if err != nil {
-						return []models.PostInfo{}, nil
-					}
-				} else if w == "like" {
-					posts, err = s.repo.GetMyLikedPosts(user)
-					if err != nil {
-						return []models.PostInfo{}, nil
-					}
-				}
-			}
 		} else if key == "tag" {
 			for _, w := range val {
 				id, err := strconv.Atoi(w)

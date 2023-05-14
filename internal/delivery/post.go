@@ -204,12 +204,18 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			Likes:    likesPost,
 			Dislikes: dislikesPost,
 		}
-
+		notifications, err := h.services.GetAllNotification(user)
+		if err != nil {
+			log.Println(err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		info := models.Info{
-			User:     user,
-			Post:     post,
-			Comments: comments,
-			PostLike: newPostLike,
+			User:          user,
+			Post:          post,
+			Comments:      comments,
+			PostLike:      newPostLike,
+			Notifications: notifications,
 		}
 		if err := h.tmpl.ExecuteTemplate(w, "post.html", info); err != nil {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -269,8 +275,10 @@ func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 			Content:   "liked your post",
 			PostId:    post.ID,
 			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+			IsRead:    0,
 		}
 		if err := h.services.AddNewNotification(newNotification); err != nil {
+			log.Println(err)
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
@@ -285,36 +293,59 @@ func (h *Handler) postDislike(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	switch r.Method {
-	case http.MethodPost:
-		user, ok := r.Context().Value(key).(models.User)
-		if !ok {
-			h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
-			return
-		}
-		id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-dislike/"))
-		if err != nil {
-			h.errorHandler(w, http.StatusNotFound, err.Error())
-			return
-		}
-		newPostLike := models.PostLike{
-			UserID: user.ID,
-			PostID: id,
-			Status: -1,
-		}
-		if err := h.services.CreateDisLikePost(newPostLike); err != nil {
-			log.Printf("Post: CreateLikePost: %v\n", err)
-			if errors.Is(err, service.ErrPostNotexist) {
-				h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-				return
-			}
-			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
-		Idpost := strconv.Itoa(id)
-		http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
-	default:
+	if r.Method != http.MethodPost {
 		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
+
+	user, ok := r.Context().Value(key).(models.User)
+	if !ok {
+		h.errorHandler(w, http.StatusInternalServerError, "Unauthorized")
+		return
+	}
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post-dislike/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	newPostLike := models.PostLike{
+		UserID: user.ID,
+		PostID: id,
+		Status: -1,
+	}
+	if err := h.services.CreateDisLikePost(newPostLike); err != nil {
+		log.Printf("Post: CreateLikePost: %v\n", err)
+		if errors.Is(err, service.ErrPostNotexist) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	post, err := h.services.Post.GetPost(id)
+	if err != nil {
+		log.Printf("Post: getPost: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	if post.Author != user.Username {
+		newNotification := models.Notification{
+			From:      user.Username,
+			To:        post.Author,
+			Content:   "disliked your post",
+			PostId:    post.ID,
+			TimeStamp: time.Now().Format("2006-01-02 15:04:05"),
+			IsRead:    0,
+		}
+		if err := h.services.AddNewNotification(newNotification); err != nil {
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	}
+	Idpost := strconv.Itoa(id)
+	http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 }

@@ -30,10 +30,17 @@ func (h *Handler) profilePage(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
+	notifications, err := h.services.GetAllNotification(user)
+	if err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 	info := models.Info{
-		User:        user,
-		ProfileUser: userPage,
-		Posts:       posts,
+		User:          user,
+		ProfileUser:   userPage,
+		Posts:         posts,
+		Notifications: notifications,
 	}
 	if err := h.tmpl.ExecuteTemplate(w, "profile.html", info); err != nil {
 		log.Println("user : Executetemplate : ", err)

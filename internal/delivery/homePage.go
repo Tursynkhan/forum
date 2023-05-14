@@ -40,15 +40,17 @@ func (h *Handler) home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// notifications, err := h.services.GetAllNotification(user)
-	// if err != nil {
-	// 	h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-	// 	return
-	// }
+	notifications, err := h.services.GetAllNotification(user)
+	if err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 	info := models.Info{
-		Posts:    posts,
-		User:     user,
-		Category: categories,
+		Posts:         posts,
+		User:          user,
+		Category:      categories,
+		Notifications: notifications,
 	}
 	if err := h.tmpl.ExecuteTemplate(w, "index.html", info); err != nil {
 		log.Println(err.Error())
