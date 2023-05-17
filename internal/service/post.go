@@ -19,6 +19,8 @@ type Post interface {
 	CreatePostCategory(id int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
 	GetPostByFilter(query map[string][]string, user models.User) ([]models.PostInfo, error)
+	DeletePost(post models.PostInfo, user models.User) error
+	EditPost(oldPost models.PostInfo, newPost models.Post, user models.User) error
 }
 
 type PostService struct {
@@ -34,6 +36,7 @@ var (
 	ErrPostTitleLen   = errors.New("title length out of range")
 	ErrPostContentLen = errors.New("content length out of range")
 	ErrInvalidType    = errors.New("The provided file format is not allowed")
+	ErrInvalidUser    = errors.New("invalid user")
 )
 
 func (s *PostService) CreatePost(post models.Post) (int, error) {
@@ -59,6 +62,16 @@ func (s *PostService) CreatePost(post models.Post) (int, error) {
 		return 0, fmt.Errorf("service: SaveImageForPost: %w", err)
 	}
 	return id, nil
+}
+
+func (s *PostService) DeletePost(post models.PostInfo, user models.User) error {
+	if user.Username != post.Author {
+		return fmt.Errorf("service : DeletePost : %w: can't delete post", ErrInvalidUser)
+	}
+	if err := s.repo.DeletePostById(post.ID); err != nil {
+		return fmt.Errorf("repo : DeletePost: %w", err)
+	}
+	return nil
 }
 
 func (s *PostService) GetAllPosts() ([]models.PostInfo, error) {
@@ -170,6 +183,22 @@ func (s *PostService) SaveImageForPost(post models.Post) error {
 		if err := s.repo.SaveImageForPost(post.ID, fmt.Sprintf("/static/upload/%d/%s", post.ID, fileHeader.Filename)); err != nil {
 			return fmt.Errorf("service : SaveImageForPost : %w", err)
 		}
+	}
+	return nil
+}
+
+func (s *PostService) EditPost(oldPost models.PostInfo, newPost models.Post, user models.User) error {
+	if user.Username != oldPost.Author {
+		return fmt.Errorf("service : EditPost : %w : you can't edit post", ErrInvalidUser)
+	}
+	if isInvalidPost(newPost) {
+		return ErrInvalidPost
+	}
+	if err := checkPost(newPost); err != nil {
+		return err
+	}
+	if err := s.repo.EditPost(newPost, oldPost.ID); err != nil {
+		return fmt.Errorf("service : EditPost : %w", err)
 	}
 	return nil
 }
