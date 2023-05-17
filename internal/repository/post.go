@@ -25,6 +25,7 @@ type Post interface {
 	GetLenAllPost() (int, error)
 	SaveImageForPost(postId int, filePath string) error
 	DeletePostById(postId int) error
+	EditPost(newPost models.Post, postId int) error
 }
 
 func NewPostRepository(db *sql.DB) *PostRepository {
@@ -372,6 +373,14 @@ func (r *PostRepository) DeletePostById(postId int) error {
 	_, err := r.db.Exec("DELETE FROM posts WHERE posts.Id=?", postId)
 	if err != nil {
 		return fmt.Errorf("repository: DeletePostById: %w", err)
+	}
+	return nil
+}
+
+func (r *PostRepository) EditPost(newPost models.Post, postId int) error {
+	_, err := r.db.Exec("UPDATE posts SET title=?,content=? WHERE postId=?", newPost.Title, newPost.Content, postId)
+	if err != nil {
+		return fmt.Errorf("repo : EditPost : %w", err)
 	}
 	return nil
 }
