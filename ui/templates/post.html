@@ -63,8 +63,45 @@
         <div class="post">
             <div class="post-header">
                 <div class="title">title: <spanc class="post-title">{{.Post.Title}}</span></div>
-                <div class="time">
-                    {{.Post.Created}}
+                <div class="right-side">
+                    <div class="time">
+                        {{.Post.Created}}
+                    </div>
+                    <div class="edit-post">
+                        <button class="btn btn-edit"><img src="../static/img/edit-post.png" alt="edit"></button>
+                    </div>
+                    <div class="modal hidden">
+                        <div class="update__container">
+                            <div class="update__header">
+                              <h3>Update current Post</h3>
+                            </div>
+                            <form method="POST" action="/create/edit/" autocomplete="off">
+                              <label for="update__title">Title</label><br>
+                                <input type="text" name="update__title" value='{{.Get "title"}}'><br>
+                                <label for="update__content">Content</label><br>
+                                <textarea rows="10"  name="update__content" class="inputarea"></textarea><br>
+                                <label for="update__categories">Categories</label><br>
+                                <select size="3" multiple id="categories "name="update__categories" required>
+                                  {{range .Category}}
+                                  <option value="{{.ID}}">{{.Name}}</option>
+                                  {{end}}
+                                </select>
+                                <div class="update__field">
+                                  <button type="submit" class="createbtn"><span class="plus">+</span> Update</button> 
+                                  <div class="update__footer">
+                                    <a class="btn-close" >Close</button>
+                                  </div>
+                                </div>
+                              </form>
+                          </div>
+                    </div>
+                    <div class="overlay hidden"></div>
+                    <div class="post-options">
+                        <button class="dropdownmore" onclick="dropdownFunc()" ><img src="../static/img/dots.png" alt="dots"></button>
+                        <div class="dropdown-options" id="more">
+                            <a href="/post/delete/">Delete</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="header__post">
@@ -182,6 +219,49 @@
                 } 
         </script>
         <script src="../static/script/header.js"></script>
+        <script>
+            function dropdownFunc(){
+                document.getElementById("more").classList.toggle("show");
+            } 
+            window.onclick=function(event){
+                if (!event.target.matches('.dropdown-more')) {
+                    var dropdowns = document.getElementsByClassName("dropdown-options");
+                    var i;
+                    for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                    }
+                }
+            }
+        </script>
+        <script>
+            const modal=document.querySelector(".modal")
+            const overlay=document.querySelector(".overlay")
+            const openModalBtn=document.querySelector("btn-edit")
+            const closeModalBtn=document.querySelector(".btn-close")
 
+            const openModal=function(){
+                modal.classList.remove("hidden");
+                overlay.classList.remove("hidden");
+            }
+            openModalBtn.addEventListener("click",openModal);
+
+            const closeModal=function(){
+                modal.classList.add("hidden");
+                overlay.classList.add("hidden");
+            }
+            closeModalBtn.addEventListener("click",closeModal);
+            overlay.addEventListener("click",closeModal);
+
+            document.addEventListener("keydown");
+            document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+                modalClose();
+            }
+            });
+
+        </script>
 </body>
 </html>
