@@ -228,6 +228,97 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) deletePost(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method != http.MethodGet {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/delete/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	post, err := h.services.Post.GetPost(postId)
+	if err != nil {
+		log.Printf("Post: getPost: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	if err := h.services.DeletePost(post, user); err != nil {
+		if errors.Is(err, service.ErrInvalidUser) {
+			h.errorHandler(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (h *Handler) editPost(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method != http.MethodPost {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/edit/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	oldPost, err := h.services.GetPost(postId)
+	if err != nil {
+		log.Printf("Post: getPost: %v", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	title, ok := r.Form["update__title"]
+	if !ok {
+		h.errorHandler(w, http.StatusBadRequest, "title field not found")
+		return
+	}
+	content, ok := r.Form["update__content"]
+	if !ok {
+		h.errorHandler(w, http.StatusBadRequest, "content field not found")
+		return
+	}
+	categories, ok := r.Form["update__categories"]
+	if !ok {
+		h.errorHandler(w, http.StatusBadRequest, "categories field not found")
+		return
+	}
+	newPost := models.Post{
+		Title:   title[0],
+		Content: content[0],
+	}
+
+	err := h.services.EditPost(oldPost, newPost, user)
+	if err != nil {
+	}
+}
+
 func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(key).(models.User)
 	if user == (models.User{}) {
