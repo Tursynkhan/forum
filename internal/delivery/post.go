@@ -210,12 +210,19 @@ func (h *Handler) getPost(w http.ResponseWriter, r *http.Request) {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+		categories, err := h.services.GetAllCategories()
+		if err != nil {
+			log.Println("get post : get all categories :", err)
+			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		info := models.Info{
 			User:          user,
 			Post:          post,
 			Comments:      comments,
 			PostLike:      newPostLike,
 			Notifications: notifications,
+			Category:      categories,
 		}
 		if err := h.tmpl.ExecuteTemplate(w, "post.html", info); err != nil {
 			h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -254,6 +261,7 @@ func (h *Handler) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.services.DeletePost(post, user); err != nil {
+		log.Println(err)
 		if errors.Is(err, service.ErrInvalidUser) {
 			h.errorHandler(w, http.StatusBadRequest, err.Error())
 			return
@@ -314,9 +322,21 @@ func (h *Handler) editPost(w http.ResponseWriter, r *http.Request) {
 		Content: content[0],
 	}
 
-	err := h.services.EditPost(oldPost, newPost, user)
-	if err != nil {
+	if err := h.services.EditPost(oldPost, newPost, user); err != nil {
+		log.Println(err)
+		if errors.Is(err, service.ErrInvalidUser) {
+			h.errorHandler(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
 	}
+	if err = h.services.Post.EditPostCategory(postId, categories); err != nil {
+		log.Printf("Post: Edit PostCategory : %v\n", err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/post/%d", postId), http.StatusSeeOther)
 }
 
 func (h *Handler) postLike(w http.ResponseWriter, r *http.Request) {
