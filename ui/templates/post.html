@@ -28,24 +28,26 @@
                         </div>
                     </div>
                 </div>
-                    <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
-                    <div class="sub-menu-wrap" id="subMenu">
-                        <div class="sub-menu">
-                            <div class="user-info">
-                                <img src="../static/img/account.png" alt="">
-                                <h2>{{.User.Username}}</h2>
+                    <div class="profile-img">
+                        <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
+                        <div class="sub-menu-wrap" id="subMenu">
+                            <div class="sub-menu">
+                                <div class="user-info">
+                                    <img src="../static/img/account.png" alt="">
+                                    <p class="user-name">{{.User.Username}}</p>
+                                </div>
+                                <hr>
+                                <a href="/profile/{{.User.Username}}" class="sub-menu-link">
+                                    <img src="../static/img/user.png" alt="profile">
+                                    <p >Profile</p>
+                                    <span>></span>
+                                </a>
+                                <a href="/auth/logout" class="sub-menu-link">
+                                    <img src="../static/img/logout.png" alt="logout">
+                                    <p>LogOut</p>
+                                    <span>></span>
+                                </a>
                             </div>
-                            <hr>
-                            <a href="/profile/{{.User.Username}}" class="sub-menu-link">
-                                <img src="../static/img/user.png" alt="profile">
-                                <p>Profile</p>
-                                <span>></span>
-                            </a>
-                            <a href="/auth/logout" class="sub-menu-link">
-                                <img src="../static/img/logout.png" alt="logout">
-                                <p>LogOut</p>
-                                <span>></span>
-                            </a>
                         </div>
                     </div>
                 {{else}}
@@ -67,19 +69,20 @@
                     <div class="time">
                         {{.Post.Created}}
                     </div>
+                    {{if eq .User.Username .Post.Author}}
                     <div class="edit-post">
                         <button class="btn btn-edit"><img src="../static/img/edit-post.png" alt="edit"></button>
                     </div>
-                    <div class="modal hidden">
+                    <div class="modalPost hidden">
                         <div class="update__container">
                             <div class="update__header">
-                              <h3>Update current Post</h3>
+                              <h3>Edit Post</h3>
                             </div>
-                            <form method="POST" action="/create/edit/" autocomplete="off">
+                            <form method="POST" action="/post/edit/{{.Post.ID}}" autocomplete="off">
                               <label for="update__title">Title</label><br>
-                                <input type="text" name="update__title" value='{{.Get "title"}}'><br>
+                                <input type="text" name="update__title" value="{{.Post.Title}}"><br>
                                 <label for="update__content">Content</label><br>
-                                <textarea rows="10"  name="update__content" class="inputarea"></textarea><br>
+                                <textarea rows="10"  name="update__content" class="inputarea" value="{{.Post.Content}}"></textarea><br>
                                 <label for="update__categories">Categories</label><br>
                                 <select size="3" multiple id="categories "name="update__categories" required>
                                   {{range .Category}}
@@ -89,7 +92,7 @@
                                 <div class="update__field">
                                   <button type="submit" class="createbtn"><span class="plus">+</span> Update</button> 
                                   <div class="update__footer">
-                                    <a class="btn-close" >Close</button>
+                                    <a class="btn-close" >Close</a>
                                   </div>
                                 </div>
                               </form>
@@ -97,11 +100,12 @@
                     </div>
                     <div class="overlay hidden"></div>
                     <div class="post-options">
-                        <button class="dropdownmore" onclick="dropdownFunc()" ><img src="../static/img/dots.png" alt="dots"></button>
-                        <div class="dropdown-options" id="more">
-                            <a href="/post/delete/">Delete</a>
+                        <button onclick="dropdownFunc()" class="dropdownmore" ><img src="../static/img/dots.png" alt="dots"></button>
+                        <div id="more" class="dropdown-options" >
+                            <a href="/post/delete/{{.Post.ID}}">Delete</a>
                         </div>
                     </div>
+                    {{end}}
                 </div>
             </div>
             <div class="header__post">
@@ -120,7 +124,7 @@
                 {{if .Post.Images}}
                 <div class="image-list">
                     {{range $i,$value:= .Post.Images}}
-                    <div class="image fade">
+                    <div class="image fade" >
                         <img src="{{$value}}" alt="img-{{$i}}" style="width: 100%;aspect-ratio: 16/9; object-fit: cover;">
                     </div>
                     <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
@@ -224,7 +228,7 @@
                 document.getElementById("more").classList.toggle("show");
             } 
             window.onclick=function(event){
-                if (!event.target.matches('.dropdown-more')) {
+                if (!event.target.matches('.dropdownmore')) {
                     var dropdowns = document.getElementsByClassName("dropdown-options");
                     var i;
                     for (i = 0; i < dropdowns.length; i++) {
@@ -236,32 +240,6 @@
                 }
             }
         </script>
-        <script>
-            const modal=document.querySelector(".modal")
-            const overlay=document.querySelector(".overlay")
-            const openModalBtn=document.querySelector("btn-edit")
-            const closeModalBtn=document.querySelector(".btn-close")
-
-            const openModal=function(){
-                modal.classList.remove("hidden");
-                overlay.classList.remove("hidden");
-            }
-            openModalBtn.addEventListener("click",openModal);
-
-            const closeModal=function(){
-                modal.classList.add("hidden");
-                overlay.classList.add("hidden");
-            }
-            closeModalBtn.addEventListener("click",closeModal);
-            overlay.addEventListener("click",closeModal);
-
-            document.addEventListener("keydown");
-            document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-                modalClose();
-            }
-            });
-
-        </script>
+        <script src="../static/script/editpost.js"></script>
 </body>
 </html>

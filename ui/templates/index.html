@@ -29,24 +29,26 @@
                         </div>
                     </div>
                 </div>
-                    <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
-                    <div class="sub-menu-wrap" id="subMenu">
-                        <div class="sub-menu">
-                            <div class="user-info">
-                                <img src="../static/img/account.png" alt="">
-                                <h2>{{.User.Username}}</h2>
+                    <div class="profile-img">
+                        <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
+                        <div class="sub-menu-wrap" id="subMenu">
+                            <div class="sub-menu">
+                                <div class="user-info">
+                                    <img src="../static/img/account.png" alt="">
+                                    <p class="user-name">{{.User.Username}}</p>
+                                </div>
+                                <hr>
+                                <a href="/profile/{{.User.Username}}" class="sub-menu-link">
+                                    <img src="../static/img/user.png" alt="profile">
+                                    <p >Profile</p>
+                                    <span>></span>
+                                </a>
+                                <a href="/auth/logout" class="sub-menu-link">
+                                    <img src="../static/img/logout.png" alt="logout">
+                                    <p>LogOut</p>
+                                    <span>></span>
+                                </a>
                             </div>
-                            <hr>
-                            <a href="/profile/{{.User.Username}}" class="sub-menu-link">
-                                <img src="../static/img/user.png" alt="profile">
-                                <p>Profile</p>
-                                <span>></span>
-                            </a>
-                            <a href="/auth/logout" class="sub-menu-link">
-                                <img src="../static/img/logout.png" alt="logout">
-                                <p>LogOut</p>
-                                <span>></span>
-                            </a>
                         </div>
                     </div>
                 {{else}}

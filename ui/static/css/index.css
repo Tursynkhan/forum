@@ -123,12 +123,14 @@ a{
     border-radius: 50%;
     cursor:pointer;
 }
-
+.profile-img{
+    position: relative;
+}
 .sub-menu-wrap{
     position: absolute;
-    top:60px;
-    right: 350px;
-    width: 300px;
+    top:55px;
+    left: -20px;
+    width: 180px;
     max-height: 0px;
     overflow: hidden;
     transition: max-height 0.5s;
@@ -140,17 +142,16 @@ a{
 .sub-menu{
     background-color: #fff;
     padding: 20px;
-    margin: 10px;
 }
 .user-info{
     display: flex;
     align-items: center;
 }
-.user-info h2{
-    font-weight: 500;
+.user-name{
+    font-size: 18px;
 }
 .user-info img{
-    width: 50px;
+    width: 40px;
     border-radius: 50%;
     margin-right: 15px;
 }
@@ -159,7 +160,7 @@ a{
     height: 1px;
     width: 100%;
     background-color: #296da9;
-    margin:15px 0 10px;
+    margin:10px 0 10px;
 
 }
 .sub-menu-link{
@@ -171,9 +172,10 @@ a{
 }
 .sub-menu-link p{
     width: 100%;
+    font-size: 14px;
 }
 .sub-menu-link img{
-    width: 40px;
+    width: 35px;
     background: #e5e5e5;
     border-radius: 50%;
     padding: 8px;
