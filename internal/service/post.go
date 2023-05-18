@@ -17,6 +17,7 @@ type Post interface {
 	GetPost(id int) (models.PostInfo, error)
 	SaveImageForPost(post models.Post) error
 	CreatePostCategory(id int, categories []string) error
+	EditPostCategory(id int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
 	GetPostByFilter(query map[string][]string, user models.User) ([]models.PostInfo, error)
 	DeletePost(post models.PostInfo, user models.User) error
@@ -93,6 +94,13 @@ func (s *PostService) GetPost(id int) (models.PostInfo, error) {
 func (s *PostService) CreatePostCategory(id int, categories []string) error {
 	if err := s.repo.CreatePostCategory(id, categories); err != nil {
 		return fmt.Errorf("service : CreatePostCategory %w:", err)
+	}
+	return nil
+}
+
+func (s *PostService) EditPostCategory(id int, categories []string) error {
+	if err := s.repo.EditPostCategory(id, categories); err != nil {
+		return fmt.Errorf("service : EditPostCategory %w:", err)
 	}
 	return nil
 }

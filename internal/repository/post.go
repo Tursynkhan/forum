@@ -16,6 +16,7 @@ type Post interface {
 	GetAllPosts() ([]models.PostInfo, error)
 	GetPost(id int) (models.PostInfo, error)
 	CreatePostCategory(postId int, categories []string) error
+	EditPostCategory(postId int, categories []string) error
 	GetAllCategories() ([]models.Category, error)
 	GetPostsByMostLikes() ([]models.PostInfo, error)
 	GetPostsByLeastLikes() ([]models.PostInfo, error)
@@ -49,6 +50,16 @@ func (r *PostRepository) CreatePostCategory(postId int, categories []string) err
 		_, err := r.db.Exec("INSERT INTO post_categories (PostId,CategoryId) VALUES (?,?)", postId, category)
 		if err != nil {
 			return fmt.Errorf("repository : create post : %w", err)
+		}
+	}
+	return nil
+}
+
+func (r *PostRepository) EditPostCategory(postId int, categories []string) error {
+	for _, category := range categories {
+		_, err := r.db.Exec("UPDATE post_categories SET PostId=?,CategoryId=?", postId, category)
+		if err != nil {
+			return fmt.Errorf("repository : EditPostCategory : %w", err)
 		}
 	}
 	return nil
@@ -370,7 +381,7 @@ func (r *PostRepository) SaveImageForPost(postId int, filePath string) error {
 }
 
 func (r *PostRepository) DeletePostById(postId int) error {
-	_, err := r.db.Exec("DELETE FROM posts WHERE posts.Id=?", postId)
+	_, err := r.db.Exec("DELETE FROM posts WHERE Id=?", postId)
 	if err != nil {
 		return fmt.Errorf("repository: DeletePostById: %w", err)
 	}
@@ -378,7 +389,7 @@ func (r *PostRepository) DeletePostById(postId int) error {
 }
 
 func (r *PostRepository) EditPost(newPost models.Post, postId int) error {
-	_, err := r.db.Exec("UPDATE posts SET title=?,content=? WHERE postId=?", newPost.Title, newPost.Content, postId)
+	_, err := r.db.Exec("UPDATE posts SET title=?,content=? WHERE Id=?", newPost.Title, newPost.Content, postId)
 	if err != nil {
 		return fmt.Errorf("repo : EditPost : %w", err)
 	}
