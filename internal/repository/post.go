@@ -56,8 +56,12 @@ func (r *PostRepository) CreatePostCategory(postId int, categories []string) err
 }
 
 func (r *PostRepository) EditPostCategory(postId int, categories []string) error {
+	_,err:=r.db.Exec("DELETE FROM post_categories WHERE PostId=?",postId)
+	if err!=nil{
+		return fmt.Errorf("repo : EditPostCategory : %w",err)
+	}
 	for _, category := range categories {
-		_, err := r.db.Exec("UPDATE post_categories SET PostId=?,CategoryId=?", postId, category)
+		_, err := r.db.Exec("INSERT INTO post_categories (PostId,CategoryId) VALUES (?,?)", postId, category)
 		if err != nil {
 			return fmt.Errorf("repository : EditPostCategory : %w", err)
 		}
