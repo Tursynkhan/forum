@@ -100,7 +100,7 @@
                     </div>
                     <div class="overlay hidden"></div>
                     <div class="post-options">
-                        <button onclick="dropdownFunc()" class="dropdownmore" ><img src="../static/img/dots.png" alt="dots"></button>
+                        <button id ="drop" class="dropdownmore" ></button>
                         <div id="more" class="dropdown-options" >
                             <a href="/post/delete/{{.Post.ID}}">Delete</a>
                         </div>
@@ -224,21 +224,16 @@
         </script>
         <script src="../static/script/header.js"></script>
         <script>
-            function dropdownFunc(){
+            document.getElementById("drop").addEventListener("click",function(e){
                 document.getElementById("more").classList.toggle("show");
-            } 
-            window.onclick=function(event){
-                if (!event.target.matches('.dropdownmore')) {
-                    var dropdowns = document.getElementsByClassName("dropdown-options");
-                    var i;
-                    for (i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                    }
+            });
+            window.addEventListener("click",function(event){
+                if(!event.target.matches('.dropdownmore')){
+                    document.querySelectorAll('.dropdown-options.show')
+                    .forEach(openDropdown=>openDropdown.classList.remove('show'))
                 }
-            }
+            });
+            
         </script>
         <script src="../static/script/editpost.js"></script>
 </body>

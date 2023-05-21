@@ -6,11 +6,10 @@ a{
     text-decoration: none;
     color: aliceblue;
 }
-body{
-    margin: 0 auto;
-    max-width: 40%;
-}
+
 .container{
+    margin: 0 auto;
+    width: 600px;
     margin-top: 70px;
     padding: 20px;
     border: 1px solid gray;
