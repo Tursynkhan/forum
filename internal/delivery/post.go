@@ -331,7 +331,7 @@ func (h *Handler) editPost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
-	if err = h.services.Post.EditPostCategory(postId, categories); err != nil {
+	if err = h.services.EditPostCategory(postId, categories); err != nil {
 		log.Printf("Post: Edit PostCategory : %v\n", err)
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
