@@ -390,6 +390,9 @@ a{
 .show{
     display: block;
 }
+.showcom{
+    display: block;
+}
 .author{
     margin-bottom: 20px;
 }
@@ -473,32 +476,58 @@ span{
     margin-right: 10px;
     cursor: pointer;
 }
-.comments{
-    display: flex;
-    justify-content: space-between;
+.create-comment textarea{
+    width: 100%;
+    height:50px;
 }
 .comment-list {
-    padding-left: 25px;
     border-top: 1px solid #DCDCDC;
-    width: 60%;
   }
 .comment-item{
     margin-top: 15px;
     border-bottom: 1px solid #DCDCDC;
-}
-.create-comment{
-    width: 40%;
-    padding-left:50px;
 }
 .header__post{
     display: flex;
     justify-content: space-between;
 }
 .comment-header{
+    margin-top:20px;
     margin-bottom: 10px;
+}
+.comment-detailes{
+    display: flex;
+    justify-content: space-between;
 }
 .comment-author{
     padding: 0 0 5px 10px;
+}
+.comment-options{
+    position: relative;
+    display: flex;
+}
+.dropdowncom-options{
+    display: none;
+    position: absolute;
+    background-color:white;
+    z-index: 1;
+}
+.dropdowncom-options a{
+    color:black;
+    padding: 4px 6px;
+        text-decoration: none;
+        display: block;
+}
+.dropbtncom{
+    background-color:#919191;
+    border:1px solid gray;
+    transform: rotate(90deg);
+    font-size: 16px;
+    cursor: pointer;
+}
+.com-options::after{
+    content:'\2807';
+    font-size: 16px;
 }
 .com-content{
     height:60px;
@@ -506,7 +535,7 @@ span{
     margin-bottom: 10px;
     background-color:  	#e1e5ea;
     border-radius: 4px;
-    overflow: scroll;
+    overflow: auto;
 }
 .com-reaction{
     display: flex;
@@ -529,6 +558,7 @@ span{
 }
 fieldset{
     padding: 12px;
+    padding-bottom: 8px;
     border: 1px solid  	#C0C0C0;
     border-radius: 4px;
 }

@@ -100,7 +100,7 @@
                     </div>
                     <div class="overlay hidden"></div>
                     <div class="post-options">
-                        <button id ="drop" class="dropdownmore" ></button>
+                        <button id ="drop" class="dropdownmore" >...</button>
                         <div id="more" class="dropdown-options" >
                             <a href="/post/delete/{{.Post.ID}}">Delete</a>
                         </div>
@@ -151,15 +151,40 @@
             </div>
         </div>
         {{ $user := .User.Username }}
-        <div class="comment-header">
-            Comments
-        </div>
         <div class="comments">
+            {{if .User.Username}}
+            <div class="create-comment">
+                <form class="comment-form" method="POST" action="/create-comment">
+                    <fieldset>
+                        <legend>Create comment:</legend>
+                        <input type="hidden" name ="postId"value="{{.Post.ID}}">
+                        <input type="hidden" name ="uerId" value="{{.Post.UserId}}">
+                        <textarea class="comment" name="comment" required></textarea>
+                        <button type="submit" class="submit">Create</button>
+                    </fieldset>
+                </form>
+            </div>
+            {{end}}
+            <div class="comment-header">
+                Comments
+            </div>
             <div class="comment-list">
                     {{range .Comments}}
                     <div class="comment-item">
-                        <div class="comment-author">
-                            {{.Author}}
+                        <div class="comment-detailes">
+
+                            <div class="comment-author">
+                                {{.Author}}
+                            </div>
+                            {{if eq $user .Author}}
+                            <div class="comment-options">
+                                <button  id ="dropcom" class="dropbtncom" >...</button>
+                                <div id="dropcontent" class="dropdowncom-options" >
+                                    <a href="/comment/edit/{{.ID}}">Edit</a>
+                                    <a href="/comment/delete/{{.ID}}">Delete</a>
+                                </div>
+                            </div>
+                            {{end}}
                         </div>
                         <div class="com-content">
                             {{.Content}}
@@ -183,19 +208,7 @@
                     </div>
                     {{end}}
             </div>
-            {{if .User.Username}}
-            <div class="create-comment">
-                <form class="comment-form" method="POST" action="/create-comment">
-                    <fieldset>
-                        <legend>Create comment:</legend>
-                        <input type="hidden" name ="postId"value="{{.Post.ID}}">
-                        <input type="hidden" name ="uerId" value="{{.Post.UserId}}">
-                        <textarea class="comment" name="comment" required></textarea>
-                        <button type="submit" class="submit">Submit</button>
-                    </fieldset>
-                </form>
-            </div>
-            {{end}}
+           
         </div>
         </div>
         <script>
@@ -234,6 +247,18 @@
                 }
             });
             
+        </script>
+      
+        <script>
+            document.getElementById("dropcom").addEventListener("click",function(e){
+                document.getElementById("dropcontent").classList.toggle("showcom");
+            });
+            window.addEventListener("click",function(event){
+                if(!event.target.matches('.dropbtncom')){
+                    document.querySelectorAll('.dropdowncom-options.showcom')
+                    .forEach(openDrop=>openDrop.classList.remove('showcom'))
+                }
+            });
         </script>
         <script src="../static/script/editpost.js"></script>
 </body>
