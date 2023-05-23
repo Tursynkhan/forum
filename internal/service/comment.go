@@ -6,14 +6,18 @@ import (
 	"fmt"
 	"forum/internal/models"
 	"forum/internal/repository"
+	"strings"
 )
 
 var ErrPostNotexist = errors.New("Post does not exist")
+var ErrInvalidComment = errors.New("invalid comment")
 
 type Comment interface {
 	CreateComment(comment models.Comment) error
 	GetAllComments(postId int) ([]models.Comment, error)
 	GetCommentById(id int) (models.Comment, error)
+	DeleteComment(comment models.Comment) error
+	EditComment(comment models.Comment) error
 }
 
 type CommentService struct {
@@ -52,4 +56,14 @@ func (s *CommentService) GetCommentById(id int) (models.Comment, error) {
 		return models.Comment{}, fmt.Errorf("service : comment : GetCommentById : %w", err)
 	}
 	return comment, nil
+}
+func (s *CommentService) DeleteComment(comment models.Comment) error {
+	return s.repo.DeleteComment(comment)
+}
+
+func (s *CommentService) EditComment(comment models.Comment) error {
+	if strings.ReplaceAll(comment.Content, " ", "") == "" {
+		return fmt.Errorf("service: edit comment: %w", ErrInvalidComment)
+	}
+	return s.repo.EditComment(comment)
 }

@@ -17,6 +17,8 @@ type (
 		GetAllComments(postId int) ([]models.Comment, error)
 		GetCommentById(id int) (models.Comment, error)
 		GetPostById(post models.Comment) (models.Post, error)
+		DeleteComment(comment models.Comment) error
+		EditComment(comment models.Comment) error
 	}
 )
 
@@ -78,4 +80,21 @@ func (r *CommentRepository) GetPostById(post models.Comment) (models.Post, error
 		}
 	}
 	return p, nil
+}
+
+func (r *CommentRepository) DeleteComment(comment models.Comment) error {
+	_, err := r.db.Exec("DELETE FROM comments WHERE Id=?", comment.ID)
+	if err != nil {
+		return fmt.Errorf("repo : DeleteComment : %w", err)
+	}
+
+	return nil
+}
+
+func (r *CommentRepository) EditComment(comment models.Comment) error {
+	_, err := r.db.Exec("UPDATE comments SET Content=? WHERE Id=?", comment.Content, comment.ID)
+	if err != nil {
+		return fmt.Errorf("repo : EditComment : %w", err)
+	}
+	return nil
 }
