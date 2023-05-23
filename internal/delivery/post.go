@@ -333,6 +333,11 @@ func (h *Handler) editPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = h.services.EditPostCategory(postId, categories); err != nil {
 		log.Printf("Post: Edit PostCategory : %v\n", err)
+		if errors.Is(err, service.ErrInvalidPost) || errors.Is(err, service.ErrPostContentLen) || errors.Is(err, service.ErrPostTitleLen) {
+			h.errorHandler(w, http.StatusBadRequest, err.Error())
+			return
+			
+		}
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}

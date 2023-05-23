@@ -80,7 +80,81 @@ func (h *Handler) createComment(w http.ResponseWriter, r *http.Request) {
 	Idpost := strconv.Itoa(postId)
 	http.Redirect(w, r, "/post/"+Idpost, http.StatusSeeOther)
 }
+func (h *Handler) deleteComment(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method != http.MethodGet {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	commentId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment/delete/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	comment, err := h.services.GetCommentById(commentId)
+	if err != nil {
+		log.Println("deleteComment: ", err)
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	if user.Username != comment.Author {
+		h.errorHandler(w, http.StatusBadRequest, "you cant delete this comment")
+		return
+	}
+	if err := h.services.DeleteComment(comment); err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
+}
 
+func (h *Handler) editComment(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	if r.Method != http.MethodPost {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	commentId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/comment/edit/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	comment, err := h.services.GetCommentById(commentId)
+	if err != nil {
+		log.Println("deleteComment: ", err)
+		h.errorHandler(w, http.StatusNotFound, err.Error())
+		return
+	}
+	if user.Username != comment.Author {
+		h.errorHandler(w, http.StatusBadRequest, "you can`t change this comment")
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	text, ok := r.Form["comment"]
+	if !ok {
+		h.errorHandler(w, http.StatusInternalServerError, "comment field not found")
+		return
+	}
+	comment.Content = strings.Join(text, "")
+	if err := h.services.EditComment(comment); err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/post/%d", comment.PostID), http.StatusSeeOther)
+}
 func (h *Handler) commentLike(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(key).(models.User)
 	if user == (models.User{}) {
