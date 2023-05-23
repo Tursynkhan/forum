@@ -366,6 +366,7 @@ a{
     cursor: pointer;
     transform: rotate(90deg);
     font-size: 16px;
+    letter-spacing: -1px;
     background-color: transparent;
 }
 
@@ -390,9 +391,7 @@ a{
 .show{
     display: block;
 }
-.showcom{
-    display: block;
-}
+
 .author{
     margin-bottom: 20px;
 }
@@ -503,26 +502,35 @@ span{
     padding: 0 0 5px 10px;
 }
 .comment-options{
-    position: relative;
     display: flex;
+    position: relative;
 }
+
 .dropdowncom-options{
     display: none;
     position: absolute;
-    background-color:white;
+    top: 25px;
+    right: -40px;
+    background-color: #fff;
     z-index: 1;
+    border-radius: 2px;
 }
 .dropdowncom-options a{
     color:black;
     padding: 4px 6px;
-        text-decoration: none;
-        display: block;
+    text-decoration: none;
+    display: block;
 }
+.dropdowncom-options a:hover{
+    background-color:#919191;
+}
+
 .dropbtncom{
     background-color:#919191;
     border:1px solid gray;
     transform: rotate(90deg);
     font-size: 16px;
+    letter-spacing: -1px;
     cursor: pointer;
 }
 .com-options::after{
@@ -537,6 +545,29 @@ span{
     border-radius: 4px;
     overflow: auto;
 }
+.showcom{
+    display: block;
+}
+.modalComment{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-height: 100vh;
+    min-width: 100vw;
+    backdrop-filter: blur(3px);
+    z-index: 1;
+    overflow-y:scroll;
+}
+.edit-comment{
+    width: 400px;
+    margin:0 auto;
+    background-color:white;
+    margin-top:300px;
+    padding: 10px;
+    border-radius:5px;
+}
+
 .com-reaction{
     display: flex;
     justify-content: flex-end;
@@ -585,4 +616,21 @@ textarea:focus{
 }
 legend{
     color: #696969;
+}
+.editCom-header{
+    color: #696969;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #C0C0C0;
+    margin-bottom: 10px;
+}
+.comment-close {
+    color: #353636;
+}
+
+.comment-close::after {
+    content: '\00d7';
+    cursor: pointer;
+    font-size: 20px;
 }
