@@ -44,6 +44,9 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("/comment-like/", m.chain(h.commentLike))
 	mux.HandleFunc("/comment-dislike/", m.chain(h.commentDislike))
 
+	mux.HandleFunc("/create/category/", m.chain(h.createCategory))
+	mux.HandleFunc("/delete/category/", m.chain(h.deleteCategory))
+	mux.HandleFunc("/promote/user/", m.chain(h.promoteUser))
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
