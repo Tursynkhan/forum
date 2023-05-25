@@ -69,6 +69,7 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 			Email:          email[0],
 			Password:       psw[0],
 			RepeatPassword: pswRepeat[0],
+			RoleID:         1,
 		}
 		if err := h.services.Autorization.CreateUser(newUser); err != nil {
 			form := forms.New(r.PostForm)

@@ -8,7 +8,13 @@ type User struct {
 	Email          string
 	Password       string
 	RepeatPassword string
+	RoleID         int
+	Role           string
+	Token          string
+	Expiretime     time.Time
+}
 
-	Token      string
-	Expiretime time.Time
+type Role struct {
+	ID   int
+	Name string
 }

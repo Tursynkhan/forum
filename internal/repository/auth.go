@@ -29,7 +29,7 @@ func NewAuthRepository(db *sql.DB) *AuthSql {
 }
 
 func (r *AuthSql) CreateUser(user models.User) error {
-	_, err := r.db.Exec("INSERT INTO users (Username,Email,Password) VALUES (?,?,?)", user.Username, user.Email, user.Password)
+	_, err := r.db.Exec("INSERT INTO users (Username,Email,Password,RoleId) VALUES (?,?,?,?)", user.Username, user.Email, user.Password, user.RoleID)
 	if err != nil {
 		return fmt.Errorf("repository : create user : %w", err)
 	}
@@ -76,9 +76,9 @@ func (r *AuthSql) SaveToken(user models.User, sessionToken string, time time.Tim
 }
 
 func (r *AuthSql) GetUserByToken(token string) (models.User, error) {
-	row := r.db.QueryRow("SELECT users.Id,users.Username,users.Email,session.ExpireTime FROM users JOIN session ON users.Id=session.UserId WHERE session.Token=?", token)
+	row := r.db.QueryRow("SELECT users.Id,users.Username,users.Email,session.ExpireTime,users.RoleId FROM users JOIN session ON users.Id=session.UserId WHERE session.Token=?", token)
 	var user models.User
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Expiretime)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Expiretime, &user.RoleID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return models.User{}, fmt.Errorf("repository : GetUserByToken : %w", err)
