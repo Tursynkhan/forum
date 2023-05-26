@@ -8,6 +8,7 @@ type Info struct {
 	Posts         []PostInfo
 	Comments      []Comment
 	Category      []Category
+	Roles         []Role
 	PostLike      PostLike
 	CommentLike   CommentLike
 }
