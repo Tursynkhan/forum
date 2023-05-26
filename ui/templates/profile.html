@@ -20,32 +20,34 @@
                     <div class="modal-content">
                         <div class="modal-header">Notifications<span class='close' onclick='closeModal("notification")'></span></div>
                         <div class="modal-body">
-                            {{range .Notifications}}
-                            <span><a href="/profile/{{.From}}">{{.From}}</a> {{.Content}}<a href="/post/{{.PostId}}">{{.PostId}}</a></span>
-                            {{else}}
-                            <span>No notifications for you</span>
-                            {{end}}
-                    </div>
+                                {{range .Notifications}}
+                                <span><a href="/profile/{{.From}}">{{.From}}</a> {{.Content}}<a href="/post/{{.PostId}}">{{.PostId}}</a></span>
+                                {{else}}
+                                <span>No notifications for you</span>
+                                {{end}}
+                        </div>
                     </div>
                 </div>
-                    <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
-                    <div class="sub-menu-wrap" id="subMenu">
-                        <div class="sub-menu">
-                            <div class="user-info">
-                                <img src="../static/img/account.png" alt="">
-                                <h2>{{.User.Username}}</h2>
+                    <div class="profile-img">
+                        <img src="../static/img/account.png" class="user-img" alt="user-img" onclick="togglemenu()">
+                        <div class="sub-menu-wrap" id="subMenu">
+                            <div class="sub-menu">
+                                <div class="user-info">
+                                    <img src="../static/img/account.png" alt="account">
+                                    <p class="user-name">{{.User.Username}}</p>
+                                </div>
+                                <hr>
+                                <a href="/profile/{{.User.Username}}" class="sub-menu-link">
+                                    <img src="../static/img/user.png" alt="profile">
+                                    <p >Profile</p>
+                                    <span>></span>
+                                </a>
+                                <a href="/auth/logout" class="sub-menu-link">
+                                    <img src="../static/img/logout.png" alt="logout">
+                                    <p>LogOut</p>
+                                    <span>></span>
+                                </a>
                             </div>
-                            <hr>
-                            <a href="/profile/{{.User.Username}}" class="sub-menu-link">
-                                <img src="../static/img/user.png" alt="profile">
-                                <p>Profile</p>
-                                <span>></span>
-                            </a>
-                            <a href="/auth/logout" class="sub-menu-link">
-                                <img src="../static/img/logout.png" alt="logout">
-                                <p>LogOut</p>
-                                <span>></span>
-                            </a>
                         </div>
                     </div>
                 {{else}}
@@ -67,6 +69,17 @@
             <div class="description-about">
                 <p class="profile-username">{{.ProfileUser.Username}}</p>
                 <p class="profile-email">{{.ProfileUser.Email}}</p>
+                {{if eq .User.RoleID 3}}
+                <h3>Administrator</h3>
+                {{end}}
+                {{if eq .User.RoleID 4}}
+                <h3>Moderator</h3>
+                {{end}}
+                {{if eq .User.RoleID 1}}
+                <h3>User</h3>
+                {{end}}
+
+                {{if or (eq .User.RoleID 1) (eq .User.RoleID 4)}}
                 <div class="info-panel">
                     <div class="count">
                         <img src="../static/img/edit.png" alt="post" class="panel-img"><span class="count-of-number">{{.ProfileUser.CountOfPosts }}</span>
@@ -78,15 +91,66 @@
                         <img src="../static/img/comment.png" alt="comment" class="panel-img"><span class="count-of-number">{{.ProfileUser.CountOfComments}}</span>
                     </div>
                 </div>
+                {{end}}
             </div>
         </div>
-      
+
         <div class="main-body">
             <div class="filter-posts">
+                {{if or (eq .User.RoleID 1) (eq .User.RoleID 4)}}
                 <a href="/profile/{{.ProfileUser.Username}}?posts=created" class="filter">Created Posts</a>
                 <a href="/profile/{{.ProfileUser.Username}}?posts=liked" class="filter">Liked Posts</a>
                 <a href="/profile/{{.ProfileUser.Username}}?posts=commented" class="filter">Commented Posts</a>
+                {{end}}
+                {{if eq .User.RoleID 3}}
+                <a href="/profile/{{.ProfileUser.Username}}?posts=request" class="filter">Requests to approve</a>
+                <a id="report" onclick="reportFunc()" class="filter">Reports</a>
+                <a id="manage"  onclick="manageFunc()" class="filter">Manage</a>
+                {{end}}
             </div>
+            <div id="reports" class="reports" style="display: none;">
+                <a href="/profile/{{.ProfileUser.Username}}?posts=irrelevant" class="filter">irrelevant</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=obscene" class="filter">obscene</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=illegal" class="filter">illegal</a>
+                <a href="/profile/{{.ProfileUser.Username}}?posts=insulting" class="filter">insulting</a>
+            </div>
+            <div id="manages" class="manages" style="display: none;">
+                <div class="create-category">
+                    <h3>Create Category:</h3>
+                    <form action="/create/category/" method="POST" >
+                        <label for="create-category">Name of Category:</label><br>
+                        <input type="text" name="createcategory"><br>
+                        <button type="submit" class="createbtn"><span class="plus">+</span> Create</button> 
+                    </form>
+                </div>
+                <div class="delete-category">
+                    <h3>Delete Category</h3>
+                    <form action="/delete/category/" method="POST">
+                        <label for="categories">Categories</label><br>
+                        <select size="3"  id="categories "name="categories" required>
+                            {{range .Category}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select><br>
+                        <button type="submit" class="createbtn">Delete</button> 
+                    </form>
+                </div>
+            
+            <div class="update-user">
+                <h3>Promote User</h3>
+                <form action="/promote/user/" method="POST">
+                    <label for="username">Username</label>
+                    <input type="text" name="username"><br>
+                    <select size="3"  id="role "name="role" required>
+                        {{range .Roles}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                    <button type="submit" class="createbtn">Update</button> 
+                </form>
+            </div>
+            </div>
+            {{$role:=.User.RoleID}}
             {{range .Posts}}
             <div class="post-item">
                 <a href="/post/{{.ID}}">
@@ -94,25 +158,36 @@
                     <div class="post-author">
                         by: {{.Author}}
                     </div>
-                    <div class="time">
-                        {{.Created}}
+                    <div class="post-options">
+                        <div class="time">
+                            {{.Created}}
+                        </div>
+                        {{if eq $role 3}}
+                        <div class="options">
+                            <a href="/post/approved/{{.ID}}"><img src="../static/img/accept.png" alt="accept" style="width: 20px;"></a>
+                            <a href="/post/declined/{{.ID}}"><img src="../static/img/decline.png" alt="decline" style="width: 20px;"></a>
+                        </div>
+                        {{end}}
                     </div>
                 </div>
                 <div class="post-title">
                         {{.Title}}
+                </div>
+                <div class="post-content">
+                    {{.Content}}
+                </div>
+                <div class="categories">
+                    {{range .Categories}}
+                    <div class="category">
+                        {{.}}
                     </div>
-                    <div class="categories">
-                        {{range .Categories}}
-                        <div class="category">
-                            {{.}}
-                        </div>
-                        {{end}}
-                    </div>
+                    {{end}}
+                </div>
                 </a>
                 <div class="like-post">
                     <span class="like"><img src="../static/img/up.png" alt="like"></span>
                     <span class="count">{{.Likes}}</span>
-                    <span class="dislike"><img src="../static/img/down.png" alt=""></span>
+                    <span class="dislike"><img src="../static/img/down.png" alt="dislike"></span>
                     <span class="count">{{.Dislikes}}</span>
                 </div>
             </div>
@@ -120,5 +195,24 @@
         </div>
     </main>
     <script src="../static/script/header.js"></script>
+    <script>
+        function reportFunc(){
+            var x =document.getElementById("reports");
+            if (x.style.display=="none"){   
+                x.style.display="flex";
+            }else{
+                x.style.display="none";
+            }
+
+        }
+        function manageFunc(){
+            var x =document.getElementById("manages");
+            if (x.style.display=="none"){   
+                x.style.display="flex";
+            }else{
+                x.style.display="none";
+            }
+        }
+    </script>
 </body>
 </html>

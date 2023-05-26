@@ -65,11 +65,12 @@
         <div class="post">
             <div class="post-header">
                 <div class="title">title: <spanc class="post-title">{{.Post.Title}}</span></div>
+
                 <div class="right-side">
                     <div class="time">
                         {{.Post.Created}}
                     </div>
-                    {{if eq .User.Username .Post.Author}}
+                    {{if and (eq .User.Username .Post.Author) (ne .User.RoleID 3)}}
                     <div class="edit-post">
                         <button class="btn btn-edit"><img src="../static/img/edit-post.png" alt="edit"></button>
                     </div>
@@ -106,6 +107,11 @@
                         </div>
                     </div>
                     {{end}}
+                    {{if  or (eq .User.RoleID 3) ( eq .User.RoleID 4)}}
+                    <div class="delete-post">
+                        <a href="/post/delete/{{.Post.ID}}"><img src="../static/img/delete .png" alt="delete"></a>
+                    </div>
+                    {{end}}
                 </div>
             </div>
             <div class="header__post">
@@ -135,22 +141,42 @@
                 {{end}}
                 <p class="post-text">{{.Post.Content}}</p>
             </div>
-            <div class="reaction" style="display:flex">
-                <form  action="/post-like/{{.Post.ID}}" method="POST">
-                    <button  class="like" {{ if not .User.Username }} disabled {{ end }}>
-                        <img src="../static/img/like.svg" alt="like" class="like" >
-                    </button>
-                </form>
-                <span class="count-likes">{{.PostLike.Likes}}</span>
-                <form action="/post-dislike/{{.Post.ID}}" method="POST">
-                    <button  class="dislike" {{ if not .User.Username }} disabled {{ end }}>
-                        <img src="../static/img/dislike.svg" alt="dislike" class="dislike" >
-                    </button>
-                </form>
-                <span class="count-dislikes">{{.PostLike.Dislikes}} </span>
+            <div class="post-footer">
+                <div class="reaction" style="display:flex">
+                    <form  action="/post-like/{{.Post.ID}}" method="POST">
+                        <button  class="like" {{ if not .User.Username }} disabled {{ end }}>
+                            <img src="../static/img/like.svg" alt="like" class="like" >
+                        </button>
+                    </form>
+                    <span class="count-likes">{{.PostLike.Likes}}</span>
+                    <form action="/post-dislike/{{.Post.ID}}" method="POST">
+                        <button  class="dislike" {{ if not .User.Username }} disabled {{ end }}>
+                            <img src="../static/img/dislike.svg" alt="dislike" class="dislike" >
+                        </button>
+                    </form>
+                    <span class="count-dislikes">{{.PostLike.Dislikes}} </span>
+                </div>
+                <div class="right-options">
+                    <button id="reportId"  class="footer-report"><img src="../static/img/red-flag.png" alt="flag"></button>
+                </div>
+                <div id="roleModal" class="footer-roles">
+                    <div class="roles-content">
+                        Report
+                        <span  id ="closeModal" class="comment-close" ></span>
+                        <form action="/posts/report/{{.Post.ID}}" method="POST">
+                            <input type="radio" id="1" name="role" value="irrelevant">irrelevant<br>
+                            <input type="radio" id="2" name="role" value="obscene">obscene<br>
+                            <input type="radio" id="3" name="role" value="illegal ">illegal<br>
+                            <input type="radio" id="4" name="role" value="insulting">insulting<br>
+                        
+                            <button type="submit" class="report-btn">Submit</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         {{ $user := .User.Username }}
+        {{$roleId := .User.RoleID}}
         <div class="comments">
             {{if .User.Username}}
             <div class="create-comment">
@@ -168,8 +194,7 @@
             <div class="comment-header">
                 Comments
             </div>
-            {{$postId:=.Post.ID}}
-            {{$userId:=.Post.UserId}}
+            
             <div class="comment-list">
                     {{range .Comments}}
                     <div class="comment-item">
@@ -177,33 +202,38 @@
                             <div class="comment-author">
                                 {{.Author}}
                             </div>
-                            {{if eq $user .Author}}
+                            {{if and (eq $user .Author) (ne $roleId 4)}}
                             <div class="comment-options">
-                                <button  id ="dropcom" class="dropbtncom" >...</button>
-                                <div id="dropcontent" class="dropdowncom-options" >
-                                    <a  id="editId" >Edit</a>
-                                    <a href="/comment/delete/{{.ID}}">Delete</a>
+                                <button  class="trigger" ><img src="../static/img/draw.png" alt="edit"></button>
+                                <form action="/comment/delete/{{.ID}}">
+                                    <button class="btn "><img src="../static/img/delete .png" alt="delete"></button>
+                                </form>
+                            </div>
+                            <div  class="modalComment"  >
+                                <div class="modal-comment">
+                                    <div class="editCom-header">
+                                        Edit comment
+                                        <span  class="comment-close" ></span>
+                                    </div>
+                                    <form class="comment-form" method="POST" action="/comment/edit/{{.ID}}">
+                                        <fieldset>
+                                            <legend>Text:</legend>
+                                            <textarea class="comment" name="comment" required>{{.Content}}</textarea>
+                                        </fieldset>
+                                        <button type="submit" class="submit">Update</button>
+                                    </form>
                                 </div>
                             </div>
                             {{end}}
-                        </div>
-                        <div id="modalComId" class="modalComment" >
-                            <div class="edit-comment">
-                                <div class="editCom-header">
-                                    Edit comment
-                                    <span id="btnComClose" class="comment-close" ></span>
-                                </div>
-                                <form class="comment-form" method="POST" action="/comment/edit/{{.ID}}">
-                                    <fieldset>
-                                        <legend>Text:</legend>
-                                        <input type="hidden" name ="postId"value="{{$postId}}">
-                                        <input type="hidden" name ="uerId" value="{{$userId}}">
-                                        <textarea class="comment" name="comment" required>{{.Content}}</textarea>
-                                    </fieldset>
-                                    <button type="submit" class="submit">Update</button>
+                            {{if or (eq $roleId 3) (eq $roleId 4)}}
+                            <div class="comment-options">
+                                <form action="/comment/delete/{{.ID}}">
+                                    <button class="btn "><img src="../static/img/delete .png" alt="delete"></button>
                                 </form>
-                            </div>
+                            </div>  
+                            {{end}}
                         </div>
+                       
                         <div class="com-content">
                             {{.Content}}
                         </div>
@@ -229,33 +259,13 @@
            
         </div>
         </div>
-        <script>
-                let slideIndex = 1;
-                showSlides(slideIndex);
-
-                function plusSlides(n) {
-                showSlides(slideIndex += n);
-                }
-
-                function currentSlide(n) {
-                showSlides(slideIndex = n);
-                }
-
-                function showSlides(n) {
-                let i;
-                let slides = document.getElementsByClassName("image");
-                if (n > slides.length) {slideIndex = 1}
-                if (n < 1) {slideIndex = slides.length}
-                for (i = 0; i < slides.length; i++) {
-                    slides[i].style.display = "none";
-                }
-                
-                slides[slideIndex-1].style.display = "block";
-                } 
-        </script>
+        
         <script src="../static/script/header.js"></script>
+        <script src="../static/script/slide.js"></script>
+        <script src="../static/script/editpost.js"></script>
+       
         <script>
-            document.getElementById("drop").addEventListener("click",function(e){
+             document.getElementById("drop").addEventListener("click",function(e){
                 document.getElementById("more").classList.toggle("show");
             });
             window.addEventListener("click",function(event){
@@ -264,37 +274,34 @@
                     .forEach(openDropdown=>openDropdown.classList.remove('show'))
                 }
             });
-            
-        </script>
-      
-        <script>
-            document.getElementById("dropcom").addEventListener("click",function(e){
-                document.getElementById("dropcontent").classList.toggle("showcom");
-            });
-            window.addEventListener("click",function(event){
-                if(!event.target.matches('.dropbtncom')){
-                    document.querySelectorAll('.dropdowncom-options.showcom')
-                    .forEach(openDrop=>openDrop.classList.remove('showcom'))
-                }
-            });
-        </script>
-        <script>
-            let modal=document.getElementById("modalComId")
-            let btn=document.getElementById("editId")
-            let span=document.getElementById("btnComClose")
 
-            btn.onclick=function(){
-                modal.style.display="block"
-            }
-            span.onclick=function(){
-                modal.style.display="none"
-            }
-            windows.onclick=function(event){
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-        </script>
-        <script src="../static/script/editpost.js"></script>
+            const editButtons = document.querySelectorAll('.trigger');
+
+            // Add event listeners to each "Edit" button
+            editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modal = button.parentNode.nextElementSibling;
+                
+                // Open the modal by adding a class
+                modal.classList.add('show');
+                
+                // Close the modal when the close button is clicked
+                const closeButton = modal.querySelector('.comment-close');
+                closeButton.addEventListener('click', () => {
+                modal.classList.remove('show');
+                });
+            });
+            });
+            
+
+            document.getElementById("reportId").addEventListener("click", function() {
+                document.getElementById("roleModal").style.display = "block";
+            });
+
+            document.getElementById("closeModal").addEventListener("click", function() {
+                document.getElementById("roleModal").style.display = "none";
+            });
+          
+        </script> 
 </body>
 </html>
