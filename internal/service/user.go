@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"forum/internal/models"
@@ -16,6 +17,9 @@ type User interface {
 	CreateCategory(category string) error
 	DeleteCategoryById(categoryId int) error
 	UpdateUserRole(username string, roleId int) error
+	ApprovedPost(postId int) error
+	DeclinePost(postId int) error
+	UpdateReportOfPost(postId int, report string) error
 }
 
 type UserService struct {
@@ -53,27 +57,50 @@ func (s *UserService) GetPostByUsername(username string, query map[string][]stri
 					if err != nil {
 						return []models.PostInfo{}, err
 					}
+				} else if w == "request" {
+					posts, err = s.repo.GetPostsToApprove()
+					if err != nil {
+						return []models.PostInfo{}, err
+					}
+				} else if w == "irrelevant" {
+					posts, err = s.repo.GetPostByReportName("irrelevant")
+					if err != nil {
+						return []models.PostInfo{}, err
+					}
+				} else if w == "obscene" {
+					posts, err = s.repo.GetPostByReportName("obscene")
+					if err != nil {
+						return []models.PostInfo{}, err
+					}
+				} else if w == "illegal" {
+					posts, err = s.repo.GetPostByReportName("illegal")
+					if err != nil {
+						return []models.PostInfo{}, err
+					}
+				} else if w == "insulting" {
+					posts, err = s.repo.GetPostByReportName("insulting")
+					if err != nil {
+						return []models.PostInfo{}, err
+					}
 				}
 			}
 		} else {
 			return []models.PostInfo{}, err
 		}
 	}
-	// switch strings.Join(search, "") {
-	// case "created":
-	// 	posts, err = s.repo.GetPostByUsername(username)
-	// case "liked":
-	// 	posts, err = s.repo.GetLikedPostByUsername(username)
-	// case "commented":
-	// 	posts, err = s.repo.GetCommentedPostByUsername(username)
-	// default:
-	// 	return nil, fmt.Errorf("service: GetPostByUsernameL %w", err)
-	// }
+
 	return posts, nil
 }
 
 func (s *UserService) GetProfileByUsername(username string) (models.ProfileUser, error) {
-	return s.repo.GetProfileByUsername(username)
+	profile, err := s.repo.GetProfileByUsername(username)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.ProfileUser{}, fmt.Errorf("service : GetProfileByUsername :%w", err)
+		}
+		return models.ProfileUser{}, fmt.Errorf("service : GetProfileByUsername :%w", err)
+	}
+	return profile, nil
 }
 
 func (s *UserService) GetAllRoles() ([]models.Role, error) {
@@ -85,11 +112,21 @@ func (s *UserService) CreateCategory(category string) error {
 func (s *UserService) DeleteCategoryById(categoryId int) error {
 	name, err := s.repo.GetNameCategoryById(categoryId)
 	if err != nil {
-		fmt.Errorf("service: DeleteCategoryByName : %w", err)
+		return fmt.Errorf("service: DeleteCategoryByName : %w", err)
 	}
 	return s.repo.DeleteCategoryByName(name)
 }
 func (s *UserService) UpdateUserRole(username string, roleId int) error {
 
 	return s.repo.UpdateUserRole(username, roleId)
+}
+
+func (s *UserService) ApprovedPost(postId int) error {
+	return s.repo.ApprovedPost(postId)
+}
+func (s *UserService) DeclinePost(postId int) error {
+	return s.repo.DeclinePost(postId)
+}
+func (s *UserService) UpdateReportOfPost(postId int,report string) error {
+	return s.repo.UpdateReportOfPost(postId,report)
 }

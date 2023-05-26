@@ -36,7 +36,7 @@ var (
 	ErrInvalidPost    = errors.New("invalid post")
 	ErrPostTitleLen   = errors.New("title length out of range")
 	ErrPostContentLen = errors.New("content length out of range")
-	ErrInvalidType    = errors.New("The provided file format is not allowed")
+	ErrInvalidType    = errors.New("the provided file format is not allowed")
 	ErrInvalidUser    = errors.New("invalid user")
 )
 
@@ -66,9 +66,12 @@ func (s *PostService) CreatePost(post models.Post) (int, error) {
 }
 
 func (s *PostService) DeletePost(post models.PostInfo, user models.User) error {
-	if user.Username != post.Author {
+
+	if user.Username != post.Author && user.RoleID != 3 && user.RoleID != 4 {
+		print(user.Username, post.Author)
 		return fmt.Errorf("service : DeletePost : %w: can't delete post", ErrInvalidUser)
 	}
+
 	if err := s.repo.DeletePostById(post.ID); err != nil {
 		return fmt.Errorf("repo : DeletePost: %w", err)
 	}
