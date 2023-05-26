@@ -101,7 +101,7 @@ func (h *Handler) deleteComment(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusNotFound, err.Error())
 		return
 	}
-	if user.Username != comment.Author {
+	if user.Username != comment.Author && user.RoleID != 3 && user.RoleID != 4 {
 		h.errorHandler(w, http.StatusBadRequest, "you cant delete this comment")
 		return
 	}

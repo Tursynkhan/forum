@@ -260,6 +260,7 @@ func (h *Handler) deletePost(w http.ResponseWriter, r *http.Request) {
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
+
 	if err := h.services.DeletePost(post, user); err != nil {
 		log.Println(err)
 		if errors.Is(err, service.ErrInvalidUser) {
@@ -336,7 +337,7 @@ func (h *Handler) editPost(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, service.ErrInvalidPost) || errors.Is(err, service.ErrPostContentLen) || errors.Is(err, service.ErrPostTitleLen) {
 			h.errorHandler(w, http.StatusBadRequest, err.Error())
 			return
-			
+
 		}
 		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
