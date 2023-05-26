@@ -135,3 +135,88 @@ func (h *Handler) promoteUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/profile/"+user.Username, http.StatusSeeOther)
 
 }
+func (h *Handler) approve(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/approved/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	if user.RoleID != 3 {
+		h.errorHandler(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+		return
+	}
+	if err := h.services.ApprovedPost(postId); err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	http.Redirect(w, r, "/profile/"+user.Username, http.StatusSeeOther)
+
+}
+func (h *Handler) decline(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	user := r.Context().Value(key).(models.User)
+	if user == (models.User{}) {
+		h.errorHandler(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/declined/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	if user.RoleID != 3 {
+		h.errorHandler(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+		return
+	}
+	if err := h.services.DeclinePost(postId); err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	http.Redirect(w, r, "/profile/"+user.Username, http.StatusSeeOther)
+}
+
+func (h *Handler) reportOfPost(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		h.errorHandler(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+	postId, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/posts/report/"))
+	if err != nil {
+		h.errorHandler(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+	err = r.ParseForm()
+	if err != nil {
+		h.errorHandler(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	nameReport, ok := r.Form["role"]
+	if !ok {
+		h.errorHandler(w, http.StatusInternalServerError, "role field not found")
+		return
+	}
+	fmt.Println(nameReport)
+	if err := h.services.UpdateReportOfPost(postId, nameReport[0]); err != nil {
+		log.Println(err)
+		h.errorHandler(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	http.Redirect(w, r, "/post/"+strconv.Itoa(postId), http.StatusSeeOther)
+}
