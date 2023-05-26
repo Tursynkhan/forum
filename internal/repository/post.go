@@ -57,9 +57,9 @@ func (r *PostRepository) CreatePostCategory(postId int, categories []string) err
 }
 
 func (r *PostRepository) EditPostCategory(postId int, categories []string) error {
-	_,err:=r.db.Exec("DELETE FROM post_categories WHERE PostId=?",postId)
-	if err!=nil{
-		return fmt.Errorf("repo : EditPostCategory : %w",err)
+	_, err := r.db.Exec("DELETE FROM post_categories WHERE PostId=?", postId)
+	if err != nil {
+		return fmt.Errorf("repo : EditPostCategory : %w", err)
 	}
 	for _, category := range categories {
 		_, err := r.db.Exec("INSERT INTO post_categories (PostId,CategoryId) VALUES (?,?)", postId, category)
@@ -77,7 +77,8 @@ func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
 		INNER JOIN post_categories ON posts.Id = post_categories.PostId
 		INNER JOIN categories ON categories.Id = post_categories.CategoryId
 		LEFT JOIN posts_like ON posts.Id = posts_like.PostId
-	GROUP BY posts.Id, users.Username, posts.Title, posts.Content, posts.UserId, posts.Created;
+	GROUP BY posts.Id, users.Username, posts.Title, posts.Content, posts.UserId, posts.Created
+	HAVING Approved="YES";
 	`)
 	if err != nil {
 		return []models.PostInfo{}, fmt.Errorf("repository : get all posts : %w", err)
@@ -86,13 +87,13 @@ func (r *PostRepository) GetAllPosts() ([]models.PostInfo, error) {
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -106,16 +107,16 @@ func (r *PostRepository) GetPost(id int) (models.PostInfo, error) {
 		INNER JOIN categories ON categories.Id = post_categories.CategoryId
 		LEFT JOIN posts_like ON posts.Id = posts_like.PostId
 	GROUP BY posts.Id, users.Username, posts.Title, posts.Content, posts.UserId, posts.Created HAVING posts.Id=?;
-	`,id)
+	`, id)
 	var post models.PostInfo
 	var category string
-	err := row.Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.UserId, &post.Created,&post.Likes,&post.Dislikes, &category)
+	err := row.Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.UserId, &post.Created, &post.Likes, &post.Dislikes, &category)
 	if errors.Is(err, sql.ErrNoRows) {
 		return models.PostInfo{}, err
 	} else if err != nil {
 		return models.PostInfo{}, err
 	}
-	post.Categories=strings.Split(category,",")
+	post.Categories = strings.Split(category, ",")
 	images_rows, err := r.db.Query("SELECT images.ImageName FROM images JOIN posts ON images.PostId=posts.Id WHERE posts.Id=?", &post.ID)
 	if err != nil {
 		return models.PostInfo{}, fmt.Errorf("repository: GetPost: images: %w", err)
@@ -163,13 +164,13 @@ func (r *PostRepository) GetPostsByMostLikes() ([]models.PostInfo, error) {
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -191,13 +192,13 @@ func (r *PostRepository) GetPostsByLeastLikes() ([]models.PostInfo, error) {
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -212,7 +213,7 @@ func (r *PostRepository) GetPostByCategory(categoryId int) ([]models.PostInfo, e
 		LEFT JOIN posts_like ON posts.Id = posts_like.PostId
 		WHERE categories.Id=?
 	GROUP BY posts.Id, users.Username, posts.Title, posts.Content, posts.UserId, posts.Created ORDER BY Likes DESC;
-	`,categoryId)
+	`, categoryId)
 	if err != nil {
 		return []models.PostInfo{}, fmt.Errorf("repository : GetPostsByMostLikes : %w", err)
 	}
@@ -220,13 +221,13 @@ func (r *PostRepository) GetPostByCategory(categoryId int) ([]models.PostInfo, e
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -248,13 +249,13 @@ func (r *PostRepository) GetPostsByNewest() ([]models.PostInfo, error) {
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
@@ -276,13 +277,13 @@ func (r *PostRepository) GetPostsByOldest() ([]models.PostInfo, error) {
 	for rows.Next() {
 		p := models.PostInfo{}
 		var category string
-		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created,&p.Likes,&p.Dislikes, &category)
+		err := rows.Scan(&p.ID, &p.Author, &p.Title, &p.Content, &p.UserId, &p.Created, &p.Likes, &p.Dislikes, &category)
 		if errors.Is(err, sql.ErrNoRows) {
 			return []models.PostInfo{}, errors.New("No posts")
 		} else if err != nil {
 			return []models.PostInfo{}, err
 		}
-		p.Categories=strings.Split(category,",")
+		p.Categories = strings.Split(category, ",")
 		posts = append(posts, p)
 	}
 	return posts, nil
