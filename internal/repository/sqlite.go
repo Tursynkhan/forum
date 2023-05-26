@@ -47,6 +47,8 @@ const (
 			Content TEXT,
 			Created TEXT,
 			UserId INTEGER,
+			Approved TEXT DEFAULT "NO",
+			ReportStatus TEXT,
 			FOREIGN KEY (UserId) REFERENCES users (Id) ON DELETE CASCADE
 			);`
 	categoryTable = `CREATE TABLE IF NOT EXISTS categories(

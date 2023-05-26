@@ -20,6 +20,12 @@ type User interface {
 	GetLikedPostByUsername(usernaem string) ([]models.PostInfo, error)
 	GetCommentedPostByUsername(username string) ([]models.PostInfo, error)
 	GetProfileByUsername(username string) (models.ProfileUser, error)
+	GetAllRoles() ([]models.Role, error)
+	CreateCategory(category string) error
+	GetNameCategoryById(categoryId int) (string, error)
+	DeleteCategoryByName(category string) error
+	GetRoleIdByName(nameRole string) (int, error)
+	UpdateUserRole(username string, roleId int) error
 }
 
 func (r *UserRepository) GetPostByUsername(username string) ([]models.PostInfo, error) {
@@ -154,4 +160,71 @@ func (r *UserRepository) GetProfileByUsername(username string) (models.ProfileUs
 		}
 	}
 	return user, nil
+}
+
+func (r *UserRepository) GetAllRoles() ([]models.Role, error) {
+	rows, err := r.db.Query("SELECT Id,Name FROM roles")
+	if err != nil {
+		return []models.Role{}, fmt.Errorf("repository : GetAllRoles: %w", err)
+	}
+	var roles []models.Role
+	for rows.Next() {
+		var r models.Role
+		err := rows.Scan(&r.ID, &r.Name)
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.Role{}, err
+		} else if err != nil {
+			return []models.Role{}, err
+		}
+		roles = append(roles, r)
+	}
+	return roles, nil
+}
+func (r *UserRepository) CreateCategory(category string) error {
+	_, err := r.db.Exec("INSERT OR IGNORE INTO categories(Name) VALUES (?) ", category)
+	if err != nil {
+		return fmt.Errorf("repo : CreateCategory : %w", err)
+	}
+	return nil
+}
+func (r *UserRepository) DeleteCategoryByName(category string) error {
+	_, err := r.db.Exec("DELETE FROM categories WHERE Name=?", category)
+	if err != nil {
+		return fmt.Errorf("repo : DeleteCategoryByName : %w", err)
+	}
+	return nil
+}
+func (r *UserRepository) GetRoleIdByName(nameRole string) (int, error) {
+	row := r.db.QueryRow("SELECT Id FROM roles WHERE Name=?", nameRole)
+	var roleId int
+	err := row.Scan(&roleId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("user : GetRoleIdByName : %w", err)
+		} else {
+			return 0, err
+		}
+	}
+	return roleId, nil
+}
+func (r *UserRepository) UpdateUserRole(username string, roleId int) error {
+	_, err := r.db.Exec("UPDATE users SET RoleId=? WHERE Username=?", roleId, username)
+	if err != nil {
+		return fmt.Errorf("repo : UpdateUserRole : %w", err)
+	}
+	return nil
+}
+
+func (r *UserRepository) GetNameCategoryById(categoryId int) (string, error) {
+	row := r.db.QueryRow("SELECT Name FROM categories WHERE Id=?", categoryId)
+	var category string
+	err := row.Scan(&category)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("user : GetRoleIdByName : %w", err)
+		} else {
+			return "", err
+		}
+	}
+	return category, nil
 }
